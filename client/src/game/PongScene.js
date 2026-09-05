@@ -4,6 +4,78 @@ export const GAME_WIDTH = 720;
 export const GAME_HEIGHT = 380;
 export const WIN_SCORE = 5;
 
+function createPongAudio() {
+  let ctx = null;
+
+  function getCtx() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) {
+      return null;
+    }
+    if (!ctx) {
+      ctx = new AudioCtx();
+    }
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    return ctx;
+  }
+
+  function beep({ type = 'square', freq = 440, freqEnd, duration = 0.08, volume = 0.08, delay = 0 }) {
+    try {
+      const audio = getCtx();
+      if (!audio) {
+        return;
+      }
+
+      const start = audio.currentTime + delay;
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(freq, start);
+      if (freqEnd) {
+        oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, freqEnd), start + duration);
+      }
+      gain.gain.setValueAtTime(volume, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(audio.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.02);
+    } catch {
+      // Ignore audio errors so a blocked sound never stops play.
+    }
+  }
+
+  return {
+    unlock: getCtx,
+    paddle(playerHit) {
+      beep({ freq: playerHit ? 560 : 420, duration: 0.07, volume: 0.08 });
+    },
+    wall() {
+      beep({ type: 'triangle', freq: 280, duration: 0.06, volume: 0.07 });
+    },
+    serve() {
+      beep({ type: 'sine', freq: 640, freqEnd: 880, duration: 0.12, volume: 0.07 });
+    },
+    score() {
+      beep({ freq: 523, duration: 0.09, volume: 0.09 });
+      beep({ freq: 659, duration: 0.12, volume: 0.09, delay: 0.08 });
+    },
+    miss() {
+      beep({ type: 'triangle', freq: 220, freqEnd: 90, duration: 0.22, volume: 0.09 });
+    },
+    win() {
+      beep({ freq: 523, duration: 0.1, volume: 0.09 });
+      beep({ freq: 659, duration: 0.1, volume: 0.09, delay: 0.1 });
+      beep({ freq: 784, duration: 0.2, volume: 0.1, delay: 0.2 });
+    },
+    lose() {
+      beep({ type: 'triangle', freq: 330, freqEnd: 110, duration: 0.38, volume: 0.09 });
+    },
+  };
+}
+
 const PADDLE_WIDTH = 16;
 const PLAYER_PADDLE_HEIGHT = 104;
 const AI_PADDLE_HEIGHT = 78;
@@ -35,6 +107,8 @@ export default class PongScene extends Phaser.Scene {
     this.aiError = 0;
     this.pointerY = GAME_HEIGHT / 2;
     this.usingPointer = false;
+    this.nextWallSoundAt = 0;
+    this.audio = createPongAudio();
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x1f4e79);
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH - 24, GAME_HEIGHT - 24, 0x2a6f97);
@@ -91,8 +165,8 @@ export default class PongScene extends Phaser.Scene {
     );
     this.physics.add.existing(topWall, true);
     this.physics.add.existing(bottomWall, true);
-    this.physics.add.collider(this.ball, topWall);
-    this.physics.add.collider(this.ball, bottomWall);
+    this.physics.add.collider(this.ball, topWall, this.hitWall, undefined, this);
+    this.physics.add.collider(this.ball, bottomWall, this.hitWall, undefined, this);
 
     this.scoreText = this.add.text(GAME_WIDTH / 2, 28, '0  :  0', {
       fontFamily: 'Arial, sans-serif',
@@ -159,6 +233,7 @@ export default class PongScene extends Phaser.Scene {
     }
 
     this.hintText.setVisible(false);
+    this.audio.unlock();
     this.notifyState('playing');
     this.serve(true);
   }
@@ -277,10 +352,20 @@ export default class PongScene extends Phaser.Scene {
       dir * Math.cos(angle) * this.ballSpeed,
       Math.sin(angle) * this.ballSpeed
     );
+    this.audio.serve();
   }
 
   refreshAiError() {
     this.aiError = Phaser.Math.Between(-58, 58);
+  }
+
+  hitWall() {
+    if (this.serving || this.ended || this.time.now < this.nextWallSoundAt) {
+      return;
+    }
+
+    this.nextWallSoundAt = this.time.now + 90;
+    this.audio.wall();
   }
 
   bounceOffPaddle(paddle, directionX, paddleHeight) {
@@ -299,6 +384,7 @@ export default class PongScene extends Phaser.Scene {
       directionX * Math.cos(angle) * this.ballSpeed,
       Math.sin(angle) * this.ballSpeed
     );
+    this.audio.paddle(directionX > 0);
     this.refreshAiError();
   }
 
@@ -332,6 +418,12 @@ export default class PongScene extends Phaser.Scene {
     if (this.playerScore >= WIN_SCORE || this.cpuScore >= WIN_SCORE) {
       this.endGame();
       return;
+    }
+
+    if (scoredByPlayer) {
+      this.audio.score();
+    } else {
+      this.audio.miss();
     }
 
     this.serve(true);
@@ -417,6 +509,11 @@ export default class PongScene extends Phaser.Scene {
     this.ball.body.stop();
     this.ball.body.enable = false;
     this.serveText.setVisible(false);
+    if (this.playerScore >= WIN_SCORE) {
+      this.audio.win();
+    } else {
+      this.audio.lose();
+    }
     this.notifyState('ended');
 
     const onGameOver = this.registry.get('onGameOver');
