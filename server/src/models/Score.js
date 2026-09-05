@@ -20,8 +20,8 @@ const scoreSchema = new mongoose.Schema({
   },
 });
 
-// Compound index for leaderboard: sort by score, then recency
-scoreSchema.index({ score: -1, createdAt: -1 });
+// Compound index for leaderboard: newest first, then higher score
+scoreSchema.index({ createdAt: -1, score: -1 });
 
 const Score = mongoose.model('Score', scoreSchema);
 

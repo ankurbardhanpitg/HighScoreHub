@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import GameContainer from '../components/GameContainer.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { submitScore } from '../api.js';
+import { formatScoreDate } from '../formatDate.js';
 
 export default function Game() {
   const { user } = useAuth();
@@ -11,12 +12,14 @@ export default function Game() {
   const [score, setScore] = useState(0);
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
+  const [savedAt, setSavedAt] = useState('');
 
   const handleGameOver = useCallback((finalScore) => {
     setScore(finalScore);
     setIsGameOver(true);
     setSubmitState('idle');
     setSubmitError('');
+    setSavedAt('');
   }, []);
 
   function playAgain() {
@@ -24,6 +27,7 @@ export default function Game() {
     setScore(0);
     setSubmitState('idle');
     setSubmitError('');
+    setSavedAt('');
     setGameKey((value) => value + 1);
   }
 
@@ -38,7 +42,8 @@ export default function Game() {
     setSubmitError('');
 
     try {
-      await submitScore(score);
+      const saved = await submitScore(score);
+      setSavedAt(saved.createdAt);
       setSubmitState('saved');
     } catch (error) {
       setSubmitState('error');
@@ -78,7 +83,11 @@ export default function Game() {
             )}
 
             {submitError && <p className="error">{submitError}</p>}
-            {submitState === 'saved' && <p className="success">Score saved to the leaderboard.</p>}
+            {submitState === 'saved' && (
+              <p className="success">
+                Score saved on {formatScoreDate(savedAt)} to the leaderboard.
+              </p>
+            )}
             <div className="actions">
               <button className="button" type="button" onClick={playAgain}>
                 Play Again

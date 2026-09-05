@@ -53,7 +53,7 @@ Auth:
 Scores:
 
 - `POST /api/scores` — body `{ "score": 12 }`, requires a signed-in user. The player name is taken from the account username.
-- `GET /api/scores/top` — top 10 scores, highest first
+- `GET /api/scores/top?page=1&limit=10` — paginated scores, newest date first. Defaults to page 1 and 10 records.
 
 ## Run the client
 
@@ -76,4 +76,4 @@ Optional: set `VITE_API_URL` if the API is not at `http://localhost:3001`.
 3. Start `/client` with `npm run dev`.
 4. Open Home → Sign up or Sign in.
 5. Play a game. After Game Over, submit the score (saved under your username).
-6. Open Leaderboard to see the top 10.
+6. Open Leaderboard to see scores (10 per page).

@@ -43,13 +43,39 @@ router.post('/', requireAuth, validateScorePayload, async (req, res) => {
   }
 });
 
-router.get('/top', async (_req, res) => {
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
+
+function parsePositiveInt(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return fallback;
+  }
+  return parsed;
+}
+
+router.get('/top', async (req, res) => {
   try {
+    const page = parsePositiveInt(req.query.page, 1);
+    const limit = Math.min(parsePositiveInt(req.query.limit, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+    const total = await Score.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+    const currentPage = totalPages > 0 ? Math.min(page, totalPages) : 1;
+    const skip = (currentPage - 1) * limit;
+
     const scores = await Score.find()
-      .sort({ score: -1, createdAt: -1 })
-      .limit(10)
+      .sort({ createdAt: -1, score: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
-    return res.json(scores);
+
+    return res.json({
+      scores,
+      page: currentPage,
+      limit,
+      total,
+      totalPages,
+    });
   } catch (error) {
     console.error('Failed to load leaderboard', error);
     return res.status(500).json({ error: 'Failed to load leaderboard' });

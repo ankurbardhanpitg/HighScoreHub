@@ -71,6 +71,10 @@ export function submitScore(score) {
   });
 }
 
-export function fetchTopScores() {
-  return request('/api/scores/top');
+export function fetchTopScores(page = 1, limit = 10) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  return request(`/api/scores/top?${params.toString()}`);
 }
