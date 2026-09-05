@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
 import { addRandomTile, canMove, createInitialTiles, moveTiles } from '../game/twenty48.js';
+import { createTwenty48Audio } from '../game/twenty48Audio.js';
 
 const BEST_KEY = 'highscorehub-2048-best';
 const MOVE_MS = 160;
@@ -49,6 +50,14 @@ export default function Game2048() {
   const busyRef = useRef(busy);
   const hasWonRef = useRef(hasWon);
   const moveTimerRef = useRef(null);
+  const audioRef = useRef(null);
+
+  function audio() {
+    if (!audioRef.current) {
+      audioRef.current = createTwenty48Audio();
+    }
+    return audioRef.current;
+  }
 
   playStateRef.current = playState;
   tilesRef.current = tiles;
@@ -58,6 +67,8 @@ export default function Game2048() {
   hasWonRef.current = hasWon;
 
   const startGame = useCallback(() => {
+    audio().unlock();
+    audio().start();
     if (moveTimerRef.current) {
       window.clearTimeout(moveTimerRef.current);
       moveTimerRef.current = null;
@@ -89,6 +100,14 @@ export default function Game2048() {
       return;
     }
 
+    const mergedTiles = result.tiles.filter((tile) => tile.isMerged);
+    if (mergedTiles.length > 0) {
+      const highest = mergedTiles.reduce((max, tile) => Math.max(max, tile.value), 0);
+      audio().merge(highest);
+    } else {
+      audio().slide();
+    }
+
     busyRef.current = true;
     setBusy(true);
     tilesRef.current = result.tiles;
@@ -116,11 +135,13 @@ export default function Game2048() {
       setTiles(withSpawn);
 
       if (showWin) {
+        audio().win();
         hasWonRef.current = true;
         setHasWon(true);
         playStateRef.current = 'won';
         setPlayState('won');
       } else if (!canMove(withSpawn)) {
+        audio().lose();
         playStateRef.current = 'ended';
         setEndedReason('stuck');
         setPlayState('ended');
@@ -157,6 +178,7 @@ export default function Game2048() {
     playStateRef.current = 'playing';
     setPlayState('playing');
     if (!canMove(tilesRef.current)) {
+      audio().lose();
       playStateRef.current = 'ended';
       setEndedReason('stuck');
       setPlayState('ended');
@@ -167,6 +189,7 @@ export default function Game2048() {
     if (playStateRef.current !== 'playing' && playStateRef.current !== 'won') {
       return;
     }
+    audio().end();
     playStateRef.current = 'ended';
     setEndedReason('finished');
     setPlayState('ended');
