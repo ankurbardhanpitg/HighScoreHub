@@ -25,7 +25,7 @@ export default function GameContainer({ onGameOver }) {
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 1100 },
+          gravity: { y: 800 },
           debug: false,
         },
       },

@@ -4,10 +4,10 @@ export const GAME_WIDTH = 400;
 export const GAME_HEIGHT = 600;
 
 const PIPE_WIDTH = 64;
-const PIPE_GAP = 160;
-const PIPE_SPEED = 180;
-const SPAWN_INTERVAL = 1500;
-const FLAP_VELOCITY = -380;
+const PIPE_GAP = 320;
+const PIPE_SPEED = 120;
+const SPAWN_INTERVAL = 2200;
+const FLAP_VELOCITY = -280;
 const BIRD_RADIUS = 14;
 const GROUND_HEIGHT = 20;
 
