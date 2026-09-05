@@ -3,6 +3,69 @@ import Phaser from 'phaser';
 export const GAME_WIDTH = 720;
 export const GAME_HEIGHT = 380;
 
+function createFlappyAudio() {
+  let ctx = null;
+
+  function getCtx() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) {
+      return null;
+    }
+    if (!ctx) {
+      ctx = new AudioCtx();
+    }
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    return ctx;
+  }
+
+  function beep({ type = 'square', freq = 440, freqEnd, duration = 0.08, volume = 0.08, delay = 0 }) {
+    try {
+      const audio = getCtx();
+      if (!audio) {
+        return;
+      }
+
+      const start = audio.currentTime + delay;
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(freq, start);
+      if (freqEnd) {
+        oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, freqEnd), start + duration);
+      }
+      gain.gain.setValueAtTime(volume, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(audio.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.02);
+    } catch {
+      // Ignore audio errors so a blocked sound never stops play.
+    }
+  }
+
+  return {
+    unlock: getCtx,
+    start() {
+      beep({ type: 'sine', freq: 523, duration: 0.1, volume: 0.07 });
+      beep({ type: 'sine', freq: 784, duration: 0.14, volume: 0.07, delay: 0.08 });
+    },
+    flap() {
+      beep({ type: 'triangle', freq: 420, freqEnd: 720, duration: 0.09, volume: 0.06 });
+    },
+    score() {
+      beep({ type: 'sine', freq: 880, duration: 0.08, volume: 0.08 });
+      beep({ type: 'sine', freq: 1175, duration: 0.12, volume: 0.08, delay: 0.07 });
+    },
+    hit() {
+      beep({ type: 'square', freq: 180, freqEnd: 70, duration: 0.28, volume: 0.09 });
+      beep({ type: 'triangle', freq: 140, freqEnd: 50, duration: 0.4, volume: 0.08, delay: 0.04 });
+    },
+  };
+}
+
 const PIPE_WIDTH = 64;
 const PIPE_GAP = 180;
 const PIPE_SPEED = 120;
@@ -23,6 +86,7 @@ export default class FlappyScene extends Phaser.Scene {
     this.nextPipeId = 1;
     this.ignoreFlapUntil = 0;
     this.spawnEvent = null;
+    this.audio = createFlappyAudio();
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x7ed8f2);
 
@@ -130,6 +194,8 @@ export default class FlappyScene extends Phaser.Scene {
     }
 
     this.hintText.setVisible(false);
+    this.audio.unlock();
+    this.audio.start();
     this.bird.body.setAllowGravity(true);
     this.physics.resume();
     this.bird.body.setVelocityY(FLAP_VELOCITY);
@@ -207,6 +273,7 @@ export default class FlappyScene extends Phaser.Scene {
     }
 
     this.bird.body.setVelocityY(FLAP_VELOCITY);
+    this.audio.flap();
   }
 
   spawnPipes() {
@@ -296,6 +363,7 @@ export default class FlappyScene extends Phaser.Scene {
         pipe.scored = true;
         this.score += 1;
         this.scoreText.setText(`Score: ${this.score}`);
+        this.audio.score();
       }
 
       if (pipe.x < -PIPE_WIDTH) {
@@ -313,6 +381,7 @@ export default class FlappyScene extends Phaser.Scene {
     this.ended = true;
     this.physics.pause();
     this.spawnEvent?.remove(false);
+    this.audio.hit();
     this.notifyState('ended');
 
     const onGameOver = this.registry.get('onGameOver');
