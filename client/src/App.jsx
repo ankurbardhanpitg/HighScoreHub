@@ -1,8 +1,9 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import SkyDecor from './components/SkyDecor.jsx';
 import RequireAuth from './components/RequireAuth.jsx';
 import Home from './pages/Home.jsx';
+import Games from './pages/Games.jsx';
 import Game from './pages/Game.jsx';
 import Game2048 from './pages/Game2048.jsx';
 import GameWhack from './pages/GameWhack.jsx';
@@ -11,10 +12,14 @@ import HowTo from './pages/HowTo.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import SignIn from './pages/SignIn.jsx';
 import SignUp from './pages/SignUp.jsx';
-import { GAMES } from './game/games.js';
+
+function isGamesNavActive(pathname) {
+  return pathname === '/games' || pathname.startsWith('/game') || pathname.startsWith('/howto');
+}
 
 export default function App() {
   const { user, ready, signout } = useAuth();
+  const { pathname } = useLocation();
 
   return (
     <div className="app">
@@ -30,11 +35,9 @@ export default function App() {
           <NavLink to="/" end>
             Home
           </NavLink>
-          {GAMES.map((game) => (
-            <NavLink key={game.id} to={game.path} end>
-              {game.shortName}
-            </NavLink>
-          ))}
+          <NavLink to="/games" className={() => (isGamesNavActive(pathname) ? 'active' : undefined)}>
+            Games
+          </NavLink>
           {ready && user ? <NavLink to="/leaderboard">Scores</NavLink> : null}
           {ready && user ? (
             <span className="nav-user">
@@ -57,6 +60,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/games" element={<Games />} />
           <Route path="/howto/:gameId" element={<HowTo />} />
           <Route path="/game" element={<Game />} />
           <Route path="/game/2048" element={<Game2048 />} />

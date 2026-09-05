@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { GAMES } from '../game/games.js';
 
 export default function Home() {
   const { user } = useAuth();
@@ -22,17 +21,8 @@ export default function Home() {
             <p className="welcome-pill">Create a free account to save your high scores.</p>
           )}
           <div className="actions">
-            <Link className="button button-play" to="/game">
-              Play Flappy Bird
-            </Link>
-            <Link className="button button-pink" to="/game/2048">
-              Play 2048
-            </Link>
-            <Link className="button button-grass" to="/game/whack">
-              Play Whack-a-Mole
-            </Link>
-            <Link className="button button-purple" to="/game/pong">
-              Play Pong
+            <Link className="button button-play" to="/games">
+              Games
             </Link>
             {user ? (
               <Link className="button button-secondary" to="/leaderboard">
@@ -54,27 +44,6 @@ export default function Home() {
             <div className="mascot-eye" />
             <div className="mascot-beak" />
           </div>
-        </div>
-      </section>
-
-      <section className="howto">
-        <h2>Games</h2>
-        <div className="howto-grid games-grid">
-          {GAMES.map((game) => (
-            <article key={game.id} className={`howto-card ${game.cardClass}`}>
-              <span aria-hidden="true">{game.emoji}</span>
-              <h3>{game.name}</h3>
-              <p>{game.blurb}</p>
-              <div className="actions">
-                <Link className="button" to={game.path}>
-                  Play
-                </Link>
-                <Link className="button button-secondary" to={game.howToPath}>
-                  How to play
-                </Link>
-              </div>
-            </article>
-          ))}
         </div>
       </section>
     </>

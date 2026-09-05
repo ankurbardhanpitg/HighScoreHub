@@ -557,6 +557,14 @@ main {
   margin-top: 28px;
 }
 
+.games-page {
+  margin-top: 0;
+}
+
+.games-page .lede {
+  margin-bottom: 28px;
+}
+
 .howto-steps {
   list-style: none;
   margin: 0;

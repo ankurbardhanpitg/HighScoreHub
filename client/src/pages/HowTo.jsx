@@ -34,8 +34,8 @@ export default function HowTo() {
         <Link className="button button-play" to={game.path}>
           Play {game.shortName}
         </Link>
-        <Link className="button button-secondary" to="/">
-          Home
+        <Link className="button button-secondary" to="/games">
+          Games
         </Link>
       </div>
     </section>
