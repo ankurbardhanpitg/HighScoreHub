@@ -188,15 +188,12 @@ main,
   letter-spacing: 0.01em;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #ffe56d, #ffc93a);
-  box-shadow: 0 4px 0 #e09a14;
-  font-size: 1.2rem;
+.brand-logo {
+  display: block;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 nav {
@@ -450,76 +447,11 @@ main {
   min-height: 280px;
 }
 
-.mascot {
-  position: relative;
-  width: 220px;
-  height: 180px;
+.hero-logo {
+  width: min(320px, 100%);
+  height: auto;
+  filter: drop-shadow(0 14px 0 rgba(36, 80, 120, 0.12));
   animation: bob 2.4s ease-in-out infinite;
-}
-
-.mascot-body {
-  position: absolute;
-  left: 48px;
-  top: 36px;
-  width: 118px;
-  height: 108px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff4a8, var(--bird) 46%, #f5b301);
-  box-shadow: inset -10px -12px 0 rgba(214, 140, 0, 0.18), 0 16px 0 rgba(36, 80, 120, 0.12);
-}
-
-.mascot-belly {
-  position: absolute;
-  left: 78px;
-  top: 78px;
-  width: 64px;
-  height: 52px;
-  border-radius: 50%;
-  background: #fff8dc;
-}
-
-.mascot-wing {
-  position: absolute;
-  left: 28px;
-  top: 78px;
-  width: 54px;
-  height: 36px;
-  border-radius: 50%;
-  background: #ffc107;
-  transform-origin: 80% 50%;
-  animation: flap-wing 0.5s ease-in-out infinite;
-}
-
-.mascot-beak {
-  position: absolute;
-  left: 156px;
-  top: 84px;
-  border-top: 12px solid transparent;
-  border-bottom: 12px solid transparent;
-  border-left: 22px solid var(--beak);
-}
-
-.mascot-eye {
-  position: absolute;
-  left: 128px;
-  top: 68px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 8px 6px 0 #fff;
-}
-
-.mascot-eye::after {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 8px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #243047;
-  box-shadow: 8px 6px 0 #243047;
 }
 
 .howto {
@@ -995,16 +927,6 @@ main {
   }
   50% {
     transform: translateY(-12px);
-  }
-}
-
-@keyframes flap-wing {
-  0%,
-  100% {
-    transform: rotate(8deg);
-  }
-  50% {
-    transform: rotate(-28deg);
   }
 }
 
@@ -1575,8 +1497,7 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .sun,
   .cloud,
-  .mascot,
-  .mascot-wing,
+  .hero-logo,
   .puzzle-tile.is-new .puzzle-tile-face,
   .puzzle-tile.is-merged .puzzle-tile-face,
   .whack-pop {

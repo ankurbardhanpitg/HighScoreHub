@@ -37,13 +37,13 @@ export default function Home() {
           </div>
         </div>
         <div className="mascot-wrap">
-          <div className="mascot" aria-hidden="true">
-            <div className="mascot-wing" />
-            <div className="mascot-body" />
-            <div className="mascot-belly" />
-            <div className="mascot-eye" />
-            <div className="mascot-beak" />
-          </div>
+          <img
+            className="hero-logo"
+            src="/HighScoreHubLogo.png"
+            alt="HighScoreHub"
+            width="320"
+            height="320"
+          />
         </div>
       </section>
     </>

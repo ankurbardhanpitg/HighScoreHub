@@ -26,9 +26,7 @@ export default function App() {
       <SkyDecor />
       <header className="topbar">
         <NavLink to="/" className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            🏆
-          </span>
+          <img className="brand-logo" src="/HighScoreHubLogo.png" alt="" width="52" height="52" />
           HighScoreHub
         </NavLink>
         <nav>
