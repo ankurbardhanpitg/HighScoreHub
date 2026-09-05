@@ -13,7 +13,7 @@ export default function Home() {
             Welcome to <span className="highlight">HighScoreHub</span>
           </h1>
           <p className="lede">
-            Play fun games, save your scores, and climb the leaderboard. Flappy Bird and 2048 are ready — more games are on the way.
+            Play fun games, save your scores, and climb the leaderboard. Flappy Bird, 2048, and Whack-a-Mole are ready to play.
           </p>
           {user ? (
             <p className="welcome-pill">Hi {user.username}! Ready to beat your high score?</p>
@@ -26,6 +26,9 @@ export default function Home() {
             </Link>
             <Link className="button button-pink" to="/game/2048">
               Play 2048
+            </Link>
+            <Link className="button button-grass" to="/game/whack">
+              Play Whack-a-Mole
             </Link>
             {user ? (
               <Link className="button button-secondary" to="/leaderboard">
@@ -52,7 +55,7 @@ export default function Home() {
 
       <section className="howto">
         <h2>Games</h2>
-        <div className="howto-grid">
+        <div className="howto-grid games-grid">
           <article className="howto-card card-score">
             <span aria-hidden="true">🐦</span>
             <h3>Flappy Bird</h3>
@@ -69,6 +72,16 @@ export default function Home() {
             <p>Slide tiles, merge matching numbers, and chase a huge high score.</p>
             <div className="actions">
               <Link className="button" to="/game/2048">
+                Play
+              </Link>
+            </div>
+          </article>
+          <article className="howto-card card-whack">
+            <span aria-hidden="true">🔨</span>
+            <h3>Whack-a-Mole</h3>
+            <p>Tap moles as they pop up. Fast reflexes, instant bonks, big scores.</p>
+            <div className="actions">
+              <Link className="button" to="/game/whack">
                 Play
               </Link>
             </div>
@@ -137,6 +150,27 @@ export default function Home() {
             <span aria-hidden="true">🎯</span>
             <h3>Chase 2048</h3>
             <p>Reach 2048, then keep going. Every merge adds to your score.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="howto">
+        <h2>How to play Whack-a-Mole</h2>
+        <div className="howto-grid">
+          <article className="howto-card card-tap">
+            <span aria-hidden="true">🕳️</span>
+            <h3>Watch the holes</h3>
+            <p>Moles peek out for just a moment. Don’t blink!</p>
+          </article>
+          <article className="howto-card card-whack">
+            <span aria-hidden="true">👆</span>
+            <h3>Tap to bonk</h3>
+            <p>Hit a mole while it’s up. You’ll see a pop and hear a bonk.</p>
+          </article>
+          <article className="howto-card card-score">
+            <span aria-hidden="true">⏱️</span>
+            <h3>Beat the clock</h3>
+            <p>You have 30 seconds. Every hit is a point. Go for your best!</p>
           </article>
         </div>
       </section>
