@@ -16,6 +16,19 @@ function clampLimit(value) {
   return Math.min(MAX_LIMIT, Math.max(MIN_LIMIT, parsed));
 }
 
+function rankLabel(rank) {
+  if (rank === 1) {
+    return '🥇';
+  }
+  if (rank === 2) {
+    return '🥈';
+  }
+  if (rank === 3) {
+    return '🥉';
+  }
+  return rank;
+}
+
 export default function Leaderboard() {
   const [scores, setScores] = useState([]);
   const [page, setPage] = useState(1);
@@ -73,8 +86,11 @@ export default function Leaderboard() {
 
   return (
     <section className="panel leaderboard-panel">
-      <h1>Leaderboard</h1>
-      <p>Newest scores first, {limit} per page</p>
+      <div className="trophy" aria-hidden="true">
+        🏆
+      </div>
+      <h1>High scores</h1>
+      <p>Newest flights first, {limit} per page. Can you reach the top?</p>
 
       <div className="page-size">
         <label htmlFor="leaderboard-limit-preset">Scores per page</label>
@@ -114,10 +130,12 @@ export default function Leaderboard() {
         />
       </div>
 
-      {status === 'loading' && scores.length === 0 && <p>Loading scores...</p>}
+      {status === 'loading' && scores.length === 0 && <p className="loading-state">Gathering high scores...</p>}
       {status === 'error' && <p className="error">{error}</p>}
 
-      {status === 'ready' && scores.length === 0 && <p>No scores yet. Be the first to play.</p>}
+      {status === 'ready' && scores.length === 0 && (
+        <p className="empty-state">No scores yet. Be the first little flyer on the board!</p>
+      )}
 
       {scores.length > 0 && (
         <>
@@ -131,14 +149,22 @@ export default function Leaderboard() {
               </tr>
             </thead>
             <tbody>
-              {scores.map((entry, index) => (
-                <tr key={entry._id || `${entry.playerName}-${index}`}>
-                  <td>{rankStart + index + 1}</td>
-                  <td>{entry.playerName}</td>
-                  <td>{entry.score}</td>
-                  <td>{formatScoreDate(entry.createdAt)}</td>
-                </tr>
-              ))}
+              {scores.map((entry, index) => {
+                const rank = rankStart + index + 1;
+                return (
+                  <tr
+                    key={entry._id || `${entry.playerName}-${index}`}
+                    className={rank <= 3 ? `is-rank-${rank}` : undefined}
+                  >
+                    <td>
+                      <span className="rank-medal">{rankLabel(rank)}</span>
+                    </td>
+                    <td>{entry.playerName}</td>
+                    <td>{entry.score}</td>
+                    <td>{formatScoreDate(entry.createdAt)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
@@ -167,8 +193,8 @@ export default function Leaderboard() {
       )}
 
       <div className="actions">
-        <Link className="button" to="/game">
-          Play
+        <Link className="button button-play" to="/game">
+          Play now
         </Link>
         <Link className="button button-secondary" to="/">
           Home

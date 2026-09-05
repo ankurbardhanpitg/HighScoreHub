@@ -36,13 +36,15 @@ export default function SignUp() {
 
   return (
     <section className="panel">
-      <h1>Sign up</h1>
-      <p>Create an account to save scores on the leaderboard.</p>
+      <p className="eyebrow">New flyer</p>
+      <h1>Join the flock</h1>
+      <p>Pick a player name so your scores can shine on the board.</p>
       <form className="auth-form" onSubmit={handleSubmit}>
-        <label htmlFor="username">Username</label>
+        <label htmlFor="username">Player name</label>
         <input
           id="username"
           type="text"
+          autoComplete="username"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
           minLength={3}
@@ -53,6 +55,7 @@ export default function SignUp() {
         <input
           id="email"
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
@@ -61,13 +64,14 @@ export default function SignUp() {
         <input
           id="password"
           type="password"
+          autoComplete="new-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           minLength={6}
           required
         />
-        <button className="button" type="submit" disabled={saving}>
-          {saving ? 'Creating account...' : 'Sign up'}
+        <button className="button button-play" type="submit" disabled={saving}>
+          {saving ? 'Creating account...' : 'Create my account'}
         </button>
       </form>
       {error && <p className="error">{error}</p>}

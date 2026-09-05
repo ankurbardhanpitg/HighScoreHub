@@ -52,53 +52,57 @@ export default function Game() {
   }
 
   return (
-    <section className="game-page">
-      <GameContainer key={gameKey} onGameOver={handleGameOver} />
+    <section className="game-wrap">
+      <h1 className="game-title">Let’s fly!</h1>
+      <p className="game-kicker">Tap the game or press Space to flap</p>
+      <div className="game-page">
+        <div className="game-stage">
+          <GameContainer key={gameKey} onGameOver={handleGameOver} />
 
-      {isGameOver && (
-        <div className="overlay">
-          <div className="panel overlay-panel">
-            <h2>Game Over</h2>
-            <p className="final-score">Score: {score}</p>
+          {isGameOver && (
+            <div className="overlay">
+              <div className="panel overlay-panel">
+                <h2>Oh no!</h2>
+                <p className="final-score">You scored {score}!</p>
 
-            {user ? (
-              <form onSubmit={handleSubmit} className="score-form">
-                <p>Saving as {user.username}</p>
-                <button className="button" type="submit" disabled={submitState === 'saving' || submitState === 'saved'}>
-                  {submitState === 'saved' ? 'Submitted' : submitState === 'saving' ? 'Submitting...' : 'Submit'}
-                </button>
-              </form>
-            ) : (
-              <div className="score-form">
-                <p>Sign in to save this score to the leaderboard.</p>
+                {user ? (
+                  <form onSubmit={handleSubmit} className="score-form">
+                    <p>Save this score as {user.username}?</p>
+                    <button className="button" type="submit" disabled={submitState === 'saving' || submitState === 'saved'}>
+                      {submitState === 'saved' ? 'Score saved!' : submitState === 'saving' ? 'Saving...' : 'Save my score'}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="score-form">
+                    <p>Sign in to put this score on the board.</p>
+                    <div className="actions">
+                      <Link className="button" to="/signin" state={{ from: '/game' }}>
+                        Sign in
+                      </Link>
+                      <Link className="button button-pink" to="/signup" state={{ from: '/game' }}>
+                        Join in
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
+                {submitError && <p className="error">{submitError}</p>}
+                {submitState === 'saved' && (
+                  <p className="success">Saved on {formatScoreDate(savedAt)}. Nice flying!</p>
+                )}
                 <div className="actions">
-                  <Link className="button" to="/signin" state={{ from: '/game' }}>
-                    Sign in
-                  </Link>
-                  <Link className="button button-secondary" to="/signup" state={{ from: '/game' }}>
-                    Sign up
+                  <button className="button button-play" type="button" onClick={playAgain}>
+                    Play again
+                  </button>
+                  <Link className="button button-secondary" to="/leaderboard">
+                    High scores
                   </Link>
                 </div>
               </div>
-            )}
-
-            {submitError && <p className="error">{submitError}</p>}
-            {submitState === 'saved' && (
-              <p className="success">
-                Score saved on {formatScoreDate(savedAt)} to the leaderboard.
-              </p>
-            )}
-            <div className="actions">
-              <button className="button" type="button" onClick={playAgain}>
-                Play Again
-              </button>
-              <Link className="button button-secondary" to="/leaderboard">
-                View Leaderboard
-              </Link>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </section>
   );
 }

@@ -35,13 +35,15 @@ export default function SignIn() {
 
   return (
     <section className="panel">
-      <h1>Sign in</h1>
-      <p>Use your email and password to continue.</p>
+      <p className="eyebrow">Welcome back</p>
+      <h1>Sign in and fly</h1>
+      <p>Use your email and password to jump back into the sky.</p>
       <form className="auth-form" onSubmit={handleSubmit}>
         <label htmlFor="email">Email</label>
         <input
           id="email"
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
@@ -50,17 +52,18 @@ export default function SignIn() {
         <input
           id="password"
           type="password"
+          autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required
         />
-        <button className="button" type="submit" disabled={saving}>
-          {saving ? 'Signing in...' : 'Sign in'}
+        <button className="button button-play" type="submit" disabled={saving}>
+          {saving ? 'Signing in...' : 'Let’s go'}
         </button>
       </form>
       {error && <p className="error">{error}</p>}
       <p className="auth-switch">
-        New here? <Link to="/signup" state={{ from: redirectTo }}>Create an account</Link>
+        New here? <Link to="/signup" state={{ from: redirectTo }}>Join the flock</Link>
       </p>
     </section>
   );
