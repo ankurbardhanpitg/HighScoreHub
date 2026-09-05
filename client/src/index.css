@@ -632,7 +632,7 @@ main {
 
 .game-page {
   position: relative;
-  width: 400px;
+  width: 720px;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -646,8 +646,8 @@ main {
 }
 
 .game-canvas {
-  width: 400px;
-  height: 600px;
+  width: 720px;
+  height: 380px;
   overflow: hidden;
   background: #70c5ce;
   border-radius: 24px;
@@ -656,6 +656,16 @@ main {
 .game-canvas canvas {
   display: block;
   border-radius: 24px;
+}
+
+.pause-fab {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 3;
+  min-height: 44px;
+  padding: 8px 18px;
+  font-size: 1rem;
 }
 
 .overlay {
@@ -888,11 +898,27 @@ main {
   }
 }
 
-@media (max-width: 440px) {
+@media (max-width: 780px) {
   .game-page {
-    transform: scale(0.86);
+    transform: scale(0.88);
     transform-origin: top center;
-    margin-bottom: -84px;
+    margin-bottom: -46px;
+  }
+}
+
+@media (max-width: 640px) {
+  .game-page {
+    transform: scale(0.72);
+    transform-origin: top center;
+    margin-bottom: -106px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-page {
+    transform: scale(0.52);
+    transform-origin: top center;
+    margin-bottom: -182px;
   }
 }
 

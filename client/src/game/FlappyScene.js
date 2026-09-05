@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 
-export const GAME_WIDTH = 400;
-export const GAME_HEIGHT = 600;
+export const GAME_WIDTH = 720;
+export const GAME_HEIGHT = 380;
 
 const PIPE_WIDTH = 64;
-const PIPE_GAP = 320;
+const PIPE_GAP = 180;
 const PIPE_SPEED = 120;
 const SPAWN_INTERVAL = 2200;
-const FLAP_VELOCITY = -280;
+const FLAP_VELOCITY = -150;
 const BIRD_RADIUS = 14;
 const GROUND_HEIGHT = 20;
 
@@ -18,20 +18,26 @@ export default class FlappyScene extends Phaser.Scene {
 
   create() {
     this.ended = false;
+    this.playState = 'waiting';
     this.score = 0;
     this.nextPipeId = 1;
+    this.ignoreFlapUntil = 0;
+    this.spawnEvent = null;
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x7ed8f2);
 
-    this.addCloud(70, 90, 0.9);
-    this.addCloud(220, 150, 0.7);
-    this.addCloud(330, 70, 0.8);
+    this.addCloud(90, 70, 0.9);
+    this.addCloud(280, 120, 0.7);
+    this.addCloud(480, 60, 0.8);
+    this.addCloud(640, 110, 0.65);
 
     this.bird = this.add.circle(90, GAME_HEIGHT / 2, BIRD_RADIUS, 0xffd93d);
     this.physics.add.existing(this.bird);
     this.bird.body.setCircle(BIRD_RADIUS);
     this.bird.body.setBounce(0);
     this.bird.body.setCollideWorldBounds(false);
+    this.bird.body.setAllowGravity(false);
+    this.bird.body.setMaxVelocity(300, 180);
     this.bird.setDepth(5);
 
     this.birdWing = this.add.ellipse(78, GAME_HEIGHT / 2 + 4, 16, 10, 0xffc107).setDepth(4);
@@ -72,28 +78,32 @@ export default class FlappyScene extends Phaser.Scene {
     });
     this.scoreText.setDepth(10);
 
-    this.hintText = this.add.text(GAME_WIDTH / 2, 80, 'Tap or press Space!', {
+    this.hintText = this.add.text(GAME_WIDTH / 2, 80, 'Press Start when you are ready!', {
       fontFamily: 'Arial, sans-serif',
       fontSize: '18px',
       color: '#ffffff',
       stroke: '#1f4e79',
       strokeThickness: 5,
+      align: 'center',
+      wordWrap: { width: 560 },
     });
     this.hintText.setOrigin(0.5);
     this.hintText.setDepth(10);
 
-    this.input.keyboard?.addCapture('SPACE');
-    this.input.keyboard?.on('keydown-SPACE', this.flap, this);
-    this.input.on('pointerdown', this.flap, this);
+    this.physics.pause();
 
-    this.spawnEvent = this.time.addEvent({
-      delay: SPAWN_INTERVAL,
-      callback: this.spawnPipes,
-      callbackScope: this,
-      loop: true,
+    this.input.keyboard?.addCapture(['SPACE', 'P', 'ESC']);
+    this.input.keyboard?.on('keydown-SPACE', this.onSpace, this);
+    this.input.keyboard?.on('keydown-P', this.togglePause, this);
+    this.input.keyboard?.on('keydown-ESC', this.togglePause, this);
+    this.input.on('pointerdown', this.onPointer, this);
+
+    this.registry.set('gameApi', {
+      start: () => this.startGame(),
+      pause: () => this.pauseGame(),
+      resume: () => this.resumeGame(),
     });
-
-    this.spawnPipes();
+    this.notifyState('waiting');
   }
 
   addCloud(x, y, scale) {
@@ -106,22 +116,107 @@ export default class FlappyScene extends Phaser.Scene {
     cloud.setAlpha(0.92);
   }
 
-  flap() {
-    if (this.ended) {
+  notifyState(state) {
+    this.playState = state;
+    const onStateChange = this.registry.get('onStateChange');
+    if (typeof onStateChange === 'function') {
+      onStateChange(state);
+    }
+  }
+
+  startGame() {
+    if (this.ended || this.playState !== 'waiting') {
       return;
     }
 
     this.hintText.setVisible(false);
+    this.bird.body.setAllowGravity(true);
+    this.physics.resume();
+    this.bird.body.setVelocityY(FLAP_VELOCITY);
+    this.ignoreFlapUntil = this.time.now + 180;
+
+    this.spawnEvent = this.time.addEvent({
+      delay: SPAWN_INTERVAL,
+      callback: this.spawnPipes,
+      callbackScope: this,
+      loop: true,
+    });
+    this.spawnPipes();
+    this.notifyState('playing');
+  }
+
+  pauseGame() {
+    if (this.ended || this.playState !== 'playing') {
+      return;
+    }
+
+    this.physics.pause();
+    if (this.spawnEvent) {
+      this.spawnEvent.paused = true;
+    }
+    this.notifyState('paused');
+  }
+
+  resumeGame() {
+    if (this.ended || this.playState !== 'paused') {
+      return;
+    }
+
+    if (this.spawnEvent) {
+      this.spawnEvent.paused = false;
+    }
+    this.physics.resume();
+    this.ignoreFlapUntil = this.time.now + 180;
+    this.notifyState('playing');
+  }
+
+  togglePause() {
+    if (this.playState === 'playing') {
+      this.pauseGame();
+    } else if (this.playState === 'paused') {
+      this.resumeGame();
+    }
+  }
+
+  onSpace() {
+    if (this.playState === 'waiting') {
+      this.startGame();
+      return;
+    }
+
+    if (this.playState === 'paused') {
+      this.resumeGame();
+      return;
+    }
+
+    this.flap();
+  }
+
+  onPointer() {
+    if (this.playState === 'waiting') {
+      this.startGame();
+      return;
+    }
+
+    this.flap();
+  }
+
+  flap() {
+    if (this.ended || this.playState !== 'playing' || this.time.now < this.ignoreFlapUntil) {
+      return;
+    }
+
     this.bird.body.setVelocityY(FLAP_VELOCITY);
   }
 
   spawnPipes() {
-    if (this.ended) {
+    if (this.ended || this.playState !== 'playing') {
       return;
     }
 
-    const minGapCenter = 120;
-    const maxGapCenter = GAME_HEIGHT - GROUND_HEIGHT - 120;
+    const minPipeHeight = 36;
+    const minGapCenter = PIPE_GAP / 2 + minPipeHeight;
+    const maxGapCenter = GAME_HEIGHT - GROUND_HEIGHT - PIPE_GAP / 2 - minPipeHeight;
     const gapCenter = Phaser.Math.Between(minGapCenter, maxGapCenter);
     const topHeight = gapCenter - PIPE_GAP / 2;
     const bottomTop = gapCenter + PIPE_GAP / 2;
@@ -168,7 +263,7 @@ export default class FlappyScene extends Phaser.Scene {
   }
 
   update() {
-    if (this.ended) {
+    if (this.ended || this.playState !== 'playing') {
       return;
     }
 
@@ -218,6 +313,7 @@ export default class FlappyScene extends Phaser.Scene {
     this.ended = true;
     this.physics.pause();
     this.spawnEvent?.remove(false);
+    this.notifyState('ended');
 
     const onGameOver = this.registry.get('onGameOver');
     if (typeof onGameOver === 'function') {

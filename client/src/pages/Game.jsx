@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import GameContainer from '../components/GameContainer.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -7,7 +7,9 @@ import { formatScoreDate } from '../formatDate.js';
 
 export default function Game() {
   const { user } = useAuth();
+  const gameRef = useRef(null);
   const [gameKey, setGameKey] = useState(0);
+  const [playState, setPlayState] = useState('waiting');
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [submitState, setSubmitState] = useState('idle');
@@ -17,6 +19,7 @@ export default function Game() {
   const handleGameOver = useCallback((finalScore) => {
     setScore(finalScore);
     setIsGameOver(true);
+    setPlayState('ended');
     setSubmitState('idle');
     setSubmitError('');
     setSavedAt('');
@@ -24,6 +27,7 @@ export default function Game() {
 
   function playAgain() {
     setIsGameOver(false);
+    setPlayState('waiting');
     setScore(0);
     setSubmitState('idle');
     setSubmitError('');
@@ -51,13 +55,60 @@ export default function Game() {
     }
   }
 
+  const kicker =
+    playState === 'waiting'
+      ? 'Press Start when you are ready'
+      : playState === 'paused'
+        ? 'Game paused — press Resume to keep flying'
+        : playState === 'playing'
+          ? 'Tap the game or press Space to flap · P or Esc to pause'
+          : '';
+
   return (
     <section className="game-wrap">
-      <h1 className="game-title">Let’s fly!</h1>
-      <p className="game-kicker">Tap the game or press Space to flap</p>
+      {kicker ? <p className="game-kicker">{kicker}</p> : null}
       <div className="game-page">
         <div className="game-stage">
-          <GameContainer key={gameKey} onGameOver={handleGameOver} />
+          <GameContainer
+            key={gameKey}
+            ref={gameRef}
+            onGameOver={handleGameOver}
+            onStateChange={setPlayState}
+          />
+
+          {playState === 'playing' && (
+            <button className="button button-pink pause-fab" type="button" onClick={() => gameRef.current?.pause()}>
+              Pause
+            </button>
+          )}
+
+          {playState === 'waiting' && (
+            <div className="overlay" onClick={() => gameRef.current?.start()}>
+              <div className="panel overlay-panel">
+                <h2>Ready?</h2>
+                <p>Tap Start, then flap to fly through the pipes.</p>
+                <div className="actions">
+                  <button className="button button-play" type="button">
+                    Start
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {playState === 'paused' && (
+            <div className="overlay">
+              <div className="panel overlay-panel">
+                <h2>Paused</h2>
+                <p>Take a breath. The bird will wait right here.</p>
+                <div className="actions">
+                  <button className="button button-play" type="button" onClick={() => gameRef.current?.resume()}>
+                    Resume
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {isGameOver && (
             <div className="overlay">
