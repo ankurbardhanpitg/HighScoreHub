@@ -325,11 +325,13 @@ export default function GameWhack() {
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
                 <p>Moles pop out of the holes. Tap them fast before they hide!</p>
-                <TimeLimitControl seconds={roundSeconds} disabled={false} onChange={changeRound} />
                 <div className="actions">
                   <button className="button button-play" type="button">
                     Start
                   </button>
+                  <Link className="button button-secondary" to="/howto/whack" onClick={(event) => event.stopPropagation()}>
+                    How to play
+                  </Link>
                 </div>
               </div>
             </div>

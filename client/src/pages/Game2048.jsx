@@ -243,6 +243,9 @@ export default function Game2048() {
                   <button className="button button-play" type="button">
                     Start
                   </button>
+                  <Link className="button button-secondary" to="/howto/2048" onClick={(event) => event.stopPropagation()}>
+                    How to play
+                  </Link>
                 </div>
               </div>
             </div>

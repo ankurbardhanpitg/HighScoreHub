@@ -91,6 +91,9 @@ export default function Game() {
                   <button className="button button-play" type="button">
                     Start
                   </button>
+                  <Link className="button button-secondary" to="/howto/flappy" onClick={(event) => event.stopPropagation()}>
+                    How to play
+                  </Link>
                 </div>
               </div>
             </div>

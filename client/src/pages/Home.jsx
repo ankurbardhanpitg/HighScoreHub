@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { GAMES } from '../game/games.js';
 
 export default function Home() {
   const { user } = useAuth();
@@ -56,36 +57,21 @@ export default function Home() {
       <section className="howto">
         <h2>Games</h2>
         <div className="howto-grid games-grid">
-          <article className="howto-card card-score">
-            <span aria-hidden="true">🐦</span>
-            <h3>Flappy Bird</h3>
-            <p>Tap or press Space to flap. Dodge the pipes and rack up points.</p>
-            <div className="actions">
-              <Link className="button" to="/game">
-                Play
-              </Link>
-            </div>
-          </article>
-          <article className="howto-card card-merge">
-            <span aria-hidden="true">🔢</span>
-            <h3>2048</h3>
-            <p>Slide tiles, merge matching numbers, and chase a huge high score.</p>
-            <div className="actions">
-              <Link className="button" to="/game/2048">
-                Play
-              </Link>
-            </div>
-          </article>
-          <article className="howto-card card-whack">
-            <span aria-hidden="true">🔨</span>
-            <h3>Whack-a-Mole</h3>
-            <p>Tap moles as they pop up. Fast reflexes, instant bonks, big scores.</p>
-            <div className="actions">
-              <Link className="button" to="/game/whack">
-                Play
-              </Link>
-            </div>
-          </article>
+          {GAMES.map((game) => (
+            <article key={game.id} className={`howto-card ${game.cardClass}`}>
+              <span aria-hidden="true">{game.emoji}</span>
+              <h3>{game.name}</h3>
+              <p>{game.blurb}</p>
+              <div className="actions">
+                <Link className="button" to={game.path}>
+                  Play
+                </Link>
+                <Link className="button button-secondary" to={game.howToPath}>
+                  How to play
+                </Link>
+              </div>
+            </article>
+          ))}
           <article className="howto-card card-dodge">
             <span aria-hidden="true">🏆</span>
             <h3>Leaderboard</h3>
@@ -108,69 +94,6 @@ export default function Home() {
                 </div>
               </>
             )}
-          </article>
-        </div>
-      </section>
-
-      <section className="howto">
-        <h2>How to play Flappy Bird</h2>
-        <div className="howto-grid">
-          <article className="howto-card card-tap">
-            <span aria-hidden="true">👆</span>
-            <h3>Tap or Space</h3>
-            <p>Give the bird a flap whenever it starts to fall.</p>
-          </article>
-          <article className="howto-card card-dodge">
-            <span aria-hidden="true">🌿</span>
-            <h3>Dodge pipes</h3>
-            <p>Fly through the green openings. Don’t bump the edges!</p>
-          </article>
-          <article className="howto-card card-score">
-            <span aria-hidden="true">⭐</span>
-            <h3>Score points</h3>
-            <p>Each pipe you pass is a point. Beat your friends!</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="howto">
-        <h2>How to play 2048</h2>
-        <div className="howto-grid">
-          <article className="howto-card card-tap">
-            <span aria-hidden="true">➡️</span>
-            <h3>Slide the grid</h3>
-            <p>Use arrow keys, WASD, or a swipe to move every tile.</p>
-          </article>
-          <article className="howto-card card-merge">
-            <span aria-hidden="true">➕</span>
-            <h3>Merge matches</h3>
-            <p>When two tiles with the same number meet, they become one bigger tile.</p>
-          </article>
-          <article className="howto-card card-score">
-            <span aria-hidden="true">🎯</span>
-            <h3>Chase 2048</h3>
-            <p>Reach 2048, then keep going. Every merge adds to your score.</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="howto">
-        <h2>How to play Whack-a-Mole</h2>
-        <div className="howto-grid">
-          <article className="howto-card card-tap">
-            <span aria-hidden="true">🕳️</span>
-            <h3>Watch the holes</h3>
-            <p>Moles peek out for just a moment. Don’t blink!</p>
-          </article>
-          <article className="howto-card card-whack">
-            <span aria-hidden="true">👆</span>
-            <h3>Tap to bonk</h3>
-            <p>Hit a mole while it’s up. You’ll see a pop and hear a bonk.</p>
-          </article>
-          <article className="howto-card card-score">
-            <span aria-hidden="true">⏱️</span>
-            <h3>Beat the clock</h3>
-            <p>Set the time limit, then tap moles before they hide. Every hit is a point.</p>
           </article>
         </div>
       </section>

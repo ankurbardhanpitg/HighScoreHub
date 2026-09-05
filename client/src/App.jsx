@@ -6,6 +6,7 @@ import Home from './pages/Home.jsx';
 import Game from './pages/Game.jsx';
 import Game2048 from './pages/Game2048.jsx';
 import GameWhack from './pages/GameWhack.jsx';
+import HowTo from './pages/HowTo.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import SignIn from './pages/SignIn.jsx';
 import SignUp from './pages/SignUp.jsx';
@@ -55,6 +56,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/howto/:gameId" element={<HowTo />} />
           <Route path="/game" element={<Game />} />
           <Route path="/game/2048" element={<Game2048 />} />
           <Route path="/game/whack" element={<GameWhack />} />
