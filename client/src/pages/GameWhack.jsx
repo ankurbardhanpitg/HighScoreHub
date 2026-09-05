@@ -6,16 +6,34 @@ import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
 
 const HOLE_COUNT = 9;
-const ROUND_SECONDS = 30;
+const MIN_SECONDS = 10;
+const MAX_SECONDS = 90;
+const STEP_SECONDS = 5;
+const DEFAULT_SECONDS = 30;
 const BEST_KEY = 'highscorehub-whack-best';
+const TIME_KEY = 'highscorehub-whack-round';
 
 function readBest() {
   const stored = Number.parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
   return Number.isFinite(stored) && stored > 0 ? stored : 0;
 }
 
-function timings(timeLeft) {
-  const progress = 1 - timeLeft / ROUND_SECONDS;
+function clampRoundSeconds(value) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed)) {
+    return DEFAULT_SECONDS;
+  }
+  const stepped = Math.round(parsed / STEP_SECONDS) * STEP_SECONDS;
+  return Math.min(MAX_SECONDS, Math.max(MIN_SECONDS, stepped));
+}
+
+function readRoundSeconds() {
+  return clampRoundSeconds(localStorage.getItem(TIME_KEY) || DEFAULT_SECONDS);
+}
+
+function timings(timeLeft, roundSeconds) {
+  const total = Math.max(roundSeconds, 1);
+  const progress = Math.min(1, Math.max(0, 1 - timeLeft / total));
   return {
     upMs: Math.round(1050 - progress * 500),
     gapMs: Math.round(260 - progress * 130),
@@ -60,9 +78,10 @@ function playBonk(audioRef) {
 export default function GameWhack() {
   const { user } = useAuth();
   const [playState, setPlayState] = useState('waiting');
+  const [roundSeconds, setRoundSeconds] = useState(readRoundSeconds);
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(readBest);
-  const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(readRoundSeconds);
   const [streak, setStreak] = useState(0);
   const [activeHole, setActiveHole] = useState(null);
   const [bonkedHole, setBonkedHole] = useState(null);
@@ -73,6 +92,7 @@ export default function GameWhack() {
   const [savedAt, setSavedAt] = useState('');
 
   const playStateRef = useRef(playState);
+  const roundSecondsRef = useRef(roundSeconds);
   const scoreRef = useRef(score);
   const bestRef = useRef(best);
   const timeLeftRef = useRef(timeLeft);
@@ -87,6 +107,7 @@ export default function GameWhack() {
   const audioRef = useRef(null);
 
   playStateRef.current = playState;
+  roundSecondsRef.current = roundSeconds;
   scoreRef.current = score;
   bestRef.current = best;
   timeLeftRef.current = timeLeft;
@@ -117,7 +138,7 @@ export default function GameWhack() {
       return;
     }
 
-    const { upMs, gapMs } = timings(timeLeftRef.current);
+    const { upMs, gapMs } = timings(timeLeftRef.current, roundSecondsRef.current);
     const hole = nextHole(lastHoleRef.current);
     lastHoleRef.current = hole;
     lockRef.current = false;
@@ -136,15 +157,16 @@ export default function GameWhack() {
 
   const startGame = useCallback(() => {
     clearTimers();
+    const round = roundSecondsRef.current;
     scoreRef.current = 0;
-    timeLeftRef.current = ROUND_SECONDS;
+    timeLeftRef.current = round;
     activeHoleRef.current = null;
     lastHoleRef.current = null;
     streakRef.current = 0;
     lockRef.current = false;
     playStateRef.current = 'playing';
     setScore(0);
-    setTimeLeft(ROUND_SECONDS);
+    setTimeLeft(round);
     setStreak(0);
     setActiveHole(null);
     setBonkedHole(null);
@@ -218,6 +240,18 @@ export default function GameWhack() {
     };
   }, [clearTimers]);
 
+  function changeRound(delta) {
+    if (playStateRef.current === 'playing') {
+      return;
+    }
+
+    const next = clampRoundSeconds(roundSecondsRef.current + delta);
+    roundSecondsRef.current = next;
+    setRoundSeconds(next);
+    setTimeLeft(next);
+    localStorage.setItem(TIME_KEY, String(next));
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -239,11 +273,12 @@ export default function GameWhack() {
   }
 
   const overlayOpen = playState === 'waiting' || playState === 'ended';
+  const playing = playState === 'playing';
   const kicker =
     playState === 'waiting'
-      ? 'Press Start, then tap moles as they pop up'
+      ? 'Set your time, press Start, then tap moles as they pop up'
       : playState === 'playing'
-        ? 'Tap the moles the instant they peek out · 30 seconds on the clock'
+        ? `Tap the moles the instant they peek out · ${roundSeconds} seconds on the clock`
         : '';
 
   return (
@@ -257,21 +292,23 @@ export default function GameWhack() {
               <span>Score</span>
               <strong>{score}</strong>
             </div>
-            <div className={`puzzle-score${timeLeft <= 5 && playState === 'playing' ? ' is-urgent' : ''}`}>
+            <div className={`puzzle-score${timeLeft <= 5 && playing ? ' is-urgent' : ''}`}>
               <span>Time</span>
-              <strong>{playState === 'waiting' ? ROUND_SECONDS : timeLeft}</strong>
+              <strong>{playing ? timeLeft : roundSeconds}</strong>
             </div>
             <div className="puzzle-score">
               <span>Best</span>
               <strong>{best}</strong>
             </div>
           </div>
-          {playState === 'playing' ? (
+          {playing ? (
             <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
               Restart
             </button>
           ) : null}
         </div>
+
+        <TimeLimitControl seconds={roundSeconds} disabled={playing} onChange={changeRound} />
 
         <div className="puzzle-stage whack-stage">
           <WhackBoard
@@ -288,6 +325,7 @@ export default function GameWhack() {
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
                 <p>Moles pop out of the holes. Tap them fast before they hide!</p>
+                <TimeLimitControl seconds={roundSeconds} disabled={false} onChange={changeRound} />
                 <div className="actions">
                   <button className="button button-play" type="button">
                     Start
@@ -303,6 +341,7 @@ export default function GameWhack() {
                 <h2>Time’s up!</h2>
                 <p className="final-score">You scored {score}!</p>
                 {streak >= 5 ? <p>Nice streak — those reflexes are sharp.</p> : <p>Tap Start and try for an even bigger bonk streak.</p>}
+                <TimeLimitControl seconds={roundSeconds} disabled={false} onChange={changeRound} />
 
                 {user ? (
                   <form onSubmit={handleSubmit} className="score-form">
@@ -345,5 +384,32 @@ export default function GameWhack() {
         </div>
       </div>
     </section>
+  );
+}
+
+function TimeLimitControl({ seconds, disabled, onChange }) {
+  return (
+    <div className="whack-time-control" onClick={(event) => event.stopPropagation()}>
+      <span>Time limit</span>
+      <button
+        className="button whack-time-btn"
+        type="button"
+        disabled={disabled || seconds <= MIN_SECONDS}
+        aria-label="Decrease time limit"
+        onClick={() => onChange(-STEP_SECONDS)}
+      >
+        −
+      </button>
+      <strong>{seconds}s</strong>
+      <button
+        className="button whack-time-btn"
+        type="button"
+        disabled={disabled || seconds >= MAX_SECONDS}
+        aria-label="Increase time limit"
+        onClick={() => onChange(STEP_SECONDS)}
+      >
+        +
+      </button>
+    </div>
   );
 }

@@ -170,7 +170,7 @@ export default function Home() {
           <article className="howto-card card-score">
             <span aria-hidden="true">⏱️</span>
             <h3>Beat the clock</h3>
-            <p>You have 30 seconds. Every hit is a point. Go for your best!</p>
+            <p>Set the time limit, then tap moles before they hide. Every hit is a point.</p>
           </article>
         </div>
       </section>

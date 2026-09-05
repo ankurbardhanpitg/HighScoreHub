@@ -1261,6 +1261,39 @@ main {
   width: min(560px, 100%);
 }
 
+.whack-time-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 0 2px 0 rgba(36, 80, 120, 0.2);
+}
+
+.overlay-panel .whack-time-control {
+  margin: 16px 0 8px;
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.whack-time-control strong {
+  min-width: 3.5ch;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  text-align: center;
+}
+
+.whack-time-btn {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
 .whack-stage {
   background: linear-gradient(180deg, #fff, #e4f8d8);
   box-shadow: var(--shadow), 0 10px 0 #3d9a2a;
