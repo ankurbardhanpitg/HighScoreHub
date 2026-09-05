@@ -3,6 +3,7 @@ import Score from '../models/Score.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+const GAMES = ['flappy', '2048'];
 
 function parseScore(value) {
   if (typeof value === 'number') {
@@ -14,8 +15,26 @@ function parseScore(value) {
   return NaN;
 }
 
+function parseGame(value) {
+  if (value == null || value === '') {
+    return 'flappy';
+  }
+  if (typeof value === 'string' && GAMES.includes(value)) {
+    return value;
+  }
+  return null;
+}
+
+function gameFilter(game) {
+  if (game === 'flappy') {
+    return { $or: [{ game: 'flappy' }, { game: { $exists: false } }, { game: null }] };
+  }
+  return { game };
+}
+
 function validateScorePayload(req, res, next) {
   const numericScore = parseScore(req.body?.score);
+  const game = parseGame(req.body?.game);
 
   if (!Number.isFinite(numericScore)) {
     return res.status(400).json({ error: 'score must be a number' });
@@ -25,7 +44,12 @@ function validateScorePayload(req, res, next) {
     return res.status(400).json({ error: 'score cannot be negative' });
   }
 
+  if (!game) {
+    return res.status(400).json({ error: 'unknown game' });
+  }
+
   req.body.score = numericScore;
+  req.body.game = game;
   next();
 }
 
@@ -35,6 +59,7 @@ router.post('/', requireAuth, validateScorePayload, async (req, res) => {
       playerName: req.user.username,
       userId: req.user._id,
       score: req.body.score,
+      game: req.body.game,
     });
     return res.status(201).json(entry);
   } catch (error) {
@@ -56,14 +81,20 @@ function parsePositiveInt(value, fallback) {
 
 router.get('/top', requireAuth, async (req, res) => {
   try {
+    const game = parseGame(req.query.game);
+    if (!game) {
+      return res.status(400).json({ error: 'unknown game' });
+    }
+
     const page = parsePositiveInt(req.query.page, 1);
     const limit = Math.min(parsePositiveInt(req.query.limit, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-    const total = await Score.countDocuments();
+    const filter = gameFilter(game);
+    const total = await Score.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);
     const currentPage = totalPages > 0 ? Math.min(page, totalPages) : 1;
     const skip = (currentPage - 1) * limit;
 
-    const scores = await Score.find()
+    const scores = await Score.find(filter)
       .sort({ createdAt: -1, score: -1 })
       .skip(skip)
       .limit(limit)
@@ -71,6 +102,7 @@ router.get('/top', requireAuth, async (req, res) => {
 
     return res.json({
       scores,
+      game,
       page: currentPage,
       limit,
       total,

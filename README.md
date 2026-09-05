@@ -2,7 +2,10 @@
 
 A kids’ game arcade with high scores: React + Vite + Phaser 3 on the frontend, Express + MongoDB on the backend.
 
-Flappy Bird is the first game on the hub.
+Games on the hub:
+
+- Flappy Bird
+- 2048 (slide tiles, merge matching numbers, chase a high score)
 
 ## Project structure
 
@@ -54,8 +57,8 @@ Auth:
 
 Scores:
 
-- `POST /api/scores` — body `{ "score": 12 }`, requires a signed-in user. The player name is taken from the account username.
-- `GET /api/scores/top?page=1&limit=10` — paginated scores, newest date first. Requires a signed-in user. Defaults to page 1 and 10 records.
+- `POST /api/scores` — body `{ "score": 12, "game": "flappy" }`, requires a signed-in user. The player name is taken from the account username. `game` can be `"flappy"` or `"2048"` and defaults to `"flappy"`.
+- `GET /api/scores/top?page=1&limit=10&game=flappy` — paginated scores for one game, newest date first. Requires a signed-in user. Defaults to page 1, 10 records, and the Flappy Bird board.
 
 ## Run the client
 

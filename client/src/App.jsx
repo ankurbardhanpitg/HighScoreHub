@@ -4,9 +4,11 @@ import SkyDecor from './components/SkyDecor.jsx';
 import RequireAuth from './components/RequireAuth.jsx';
 import Home from './pages/Home.jsx';
 import Game from './pages/Game.jsx';
+import Game2048 from './pages/Game2048.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import SignIn from './pages/SignIn.jsx';
 import SignUp from './pages/SignUp.jsx';
+import { GAMES } from './game/games.js';
 
 export default function App() {
   const { user, ready, signout } = useAuth();
@@ -25,7 +27,11 @@ export default function App() {
           <NavLink to="/" end>
             Home
           </NavLink>
-          <NavLink to="/game">Play</NavLink>
+          {GAMES.map((game) => (
+            <NavLink key={game.id} to={game.path} end>
+              {game.shortName}
+            </NavLink>
+          ))}
           {ready && user ? <NavLink to="/leaderboard">Scores</NavLink> : null}
           {ready && user ? (
             <span className="nav-user">
@@ -49,6 +55,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/game" element={<Game />} />
+          <Route path="/game/2048" element={<Game2048 />} />
           <Route
             path="/leaderboard"
             element={

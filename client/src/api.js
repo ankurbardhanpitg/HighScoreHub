@@ -64,17 +64,18 @@ export function fetchCurrentUser() {
   return request('/api/auth/me');
 }
 
-export function submitScore(score) {
+export function submitScore(score, game = 'flappy') {
   return request('/api/scores', {
     method: 'POST',
-    body: JSON.stringify({ score }),
+    body: JSON.stringify({ score, game }),
   });
 }
 
-export function fetchTopScores(page = 1, limit = 10) {
+export function fetchTopScores(page = 1, limit = 10, game = 'flappy') {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
+    game,
   });
   return request(`/api/scores/top?${params.toString()}`);
 }

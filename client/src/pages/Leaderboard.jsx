@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { fetchTopScores } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
+import { DEFAULT_GAME, GAMES, getGame, isValidGame } from '../game/games.js';
 
 const DEFAULT_LIMIT = 10;
 const MIN_LIMIT = 1;
@@ -30,14 +31,25 @@ function rankLabel(rank) {
 }
 
 export default function Leaderboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedGame = searchParams.get('game');
+  const gameId = isValidGame(requestedGame) ? requestedGame : DEFAULT_GAME;
+  const selectedGame = getGame(gameId);
+
   const [scores, setScores] = useState([]);
   const [page, setPage] = useState(1);
+  const [pageGame, setPageGame] = useState(gameId);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [limitInput, setLimitInput] = useState(String(DEFAULT_LIMIT));
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState('');
+
+  if (pageGame !== gameId) {
+    setPageGame(gameId);
+    setPage(1);
+  }
 
   function applyLimit(nextLimit) {
     const safeLimit = clampLimit(nextLimit);
@@ -49,6 +61,13 @@ export default function Leaderboard() {
     setPage(1);
   }
 
+  function selectGame(nextGame) {
+    if (nextGame === gameId) {
+      return;
+    }
+    setSearchParams({ game: nextGame });
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -57,7 +76,7 @@ export default function Leaderboard() {
       setError('');
 
       try {
-        const data = await fetchTopScores(page, limit);
+        const data = await fetchTopScores(page, limit, gameId);
         if (!cancelled) {
           setScores(data.scores);
           setPage(data.page);
@@ -80,7 +99,7 @@ export default function Leaderboard() {
     return () => {
       cancelled = true;
     };
-  }, [page, limit]);
+  }, [page, limit, gameId]);
 
   const rankStart = (page - 1) * limit;
 
@@ -90,7 +109,23 @@ export default function Leaderboard() {
         🏆
       </div>
       <h1>High scores</h1>
-      <p>Newest scores first, {limit} per page. Can you reach the top?</p>
+      <p>
+        {selectedGame.name} — newest scores first, {limit} per page. Can you reach the top?
+      </p>
+
+      <div className="game-switcher leaderboard-games">
+        {GAMES.map((game) => (
+          <button
+            key={game.id}
+            type="button"
+            className={`game-switcher-link${game.id === gameId ? ' active' : ''}`}
+            onClick={() => selectGame(game.id)}
+          >
+            <span aria-hidden="true">{game.emoji}</span>
+            {game.name}
+          </button>
+        ))}
+      </div>
 
       <div className="page-size">
         <label htmlFor="leaderboard-limit-preset">Scores per page</label>
@@ -130,14 +165,14 @@ export default function Leaderboard() {
         />
       </div>
 
-      {status === 'loading' && scores.length === 0 && <p className="loading-state">Gathering high scores...</p>}
+      {status === 'loading' && <p className="loading-state">Gathering high scores...</p>}
       {status === 'error' && <p className="error">{error}</p>}
 
       {status === 'ready' && scores.length === 0 && (
-        <p className="empty-state">No scores yet. Be the first on the HighScoreHub board!</p>
+        <p className="empty-state">No {selectedGame.name} scores yet. Be the first on the board!</p>
       )}
 
-      {scores.length > 0 && (
+      {status === 'ready' && scores.length > 0 && (
         <>
           <table className="leaderboard-table">
             <thead>
@@ -193,8 +228,8 @@ export default function Leaderboard() {
       )}
 
       <div className="actions">
-        <Link className="button button-play" to="/game">
-          Play now
+        <Link className="button button-play" to={selectedGame.path}>
+          Play {selectedGame.shortName}
         </Link>
         <Link className="button button-secondary" to="/">
           Home

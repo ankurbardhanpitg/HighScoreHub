@@ -14,6 +14,12 @@ const scoreSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  game: {
+    type: String,
+    enum: ['flappy', '2048'],
+    default: 'flappy',
+    index: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -22,6 +28,7 @@ const scoreSchema = new mongoose.Schema({
 
 // Compound index for leaderboard: newest first, then higher score
 scoreSchema.index({ createdAt: -1, score: -1 });
+scoreSchema.index({ game: 1, createdAt: -1, score: -1 });
 
 const Score = mongoose.model('Score', scoreSchema);
 

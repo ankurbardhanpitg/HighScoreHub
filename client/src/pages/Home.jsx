@@ -13,7 +13,7 @@ export default function Home() {
             Welcome to <span className="highlight">HighScoreHub</span>
           </h1>
           <p className="lede">
-            Play fun games, save your scores, and climb the leaderboard. Flappy Bird is ready now — more games are on the way.
+            Play fun games, save your scores, and climb the leaderboard. Flappy Bird and 2048 are ready — more games are on the way.
           </p>
           {user ? (
             <p className="welcome-pill">Hi {user.username}! Ready to beat your high score?</p>
@@ -24,13 +24,16 @@ export default function Home() {
             <Link className="button button-play" to="/game">
               Play Flappy Bird
             </Link>
+            <Link className="button button-pink" to="/game/2048">
+              Play 2048
+            </Link>
             {user ? (
               <Link className="button button-secondary" to="/leaderboard">
                 High scores
               </Link>
             ) : null}
             {!user && (
-              <Link className="button button-pink" to="/signup">
+              <Link className="button" to="/signup">
                 Join HighScoreHub
               </Link>
             )}
@@ -60,10 +63,15 @@ export default function Home() {
               </Link>
             </div>
           </article>
-          <article className="howto-card card-tap">
-            <span aria-hidden="true">🎮</span>
-            <h3>More games soon</h3>
-            <p>New HighScoreHub games will land here. Stay tuned!</p>
+          <article className="howto-card card-merge">
+            <span aria-hidden="true">🔢</span>
+            <h3>2048</h3>
+            <p>Slide tiles, merge matching numbers, and chase a huge high score.</p>
+            <div className="actions">
+              <Link className="button" to="/game/2048">
+                Play
+              </Link>
+            </div>
           </article>
           <article className="howto-card card-dodge">
             <span aria-hidden="true">🏆</span>
@@ -108,6 +116,27 @@ export default function Home() {
             <span aria-hidden="true">⭐</span>
             <h3>Score points</h3>
             <p>Each pipe you pass is a point. Beat your friends!</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="howto">
+        <h2>How to play 2048</h2>
+        <div className="howto-grid">
+          <article className="howto-card card-tap">
+            <span aria-hidden="true">➡️</span>
+            <h3>Slide the grid</h3>
+            <p>Use arrow keys, WASD, or a swipe to move every tile.</p>
+          </article>
+          <article className="howto-card card-merge">
+            <span aria-hidden="true">➕</span>
+            <h3>Merge matches</h3>
+            <p>When two tiles with the same number meet, they become one bigger tile.</p>
+          </article>
+          <article className="howto-card card-score">
+            <span aria-hidden="true">🎯</span>
+            <h3>Chase 2048</h3>
+            <p>Reach 2048, then keep going. Every merge adds to your score.</p>
           </article>
         </div>
       </section>
