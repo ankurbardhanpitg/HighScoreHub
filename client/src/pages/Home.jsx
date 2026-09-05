@@ -8,28 +8,30 @@ export default function Home() {
     <>
       <section className="hero">
         <div>
-          <p className="eyebrow">A sunny sky adventure</p>
+          <p className="eyebrow">Kids’ game arcade</p>
           <h1>
-            Tap, flap, <span className="highlight">fly!</span>
+            Welcome to <span className="highlight">HighScoreHub</span>
           </h1>
           <p className="lede">
-            Help the little bird zip through the pipes. Easy to learn, fun to play, and perfect for kids.
+            Play fun games, save your scores, and climb the leaderboard. Flappy Bird is ready now — more games are on the way.
           </p>
           {user ? (
-            <p className="welcome-pill">Hi {user.username}! Ready for another flight?</p>
+            <p className="welcome-pill">Hi {user.username}! Ready to beat your high score?</p>
           ) : (
             <p className="welcome-pill">Create a free account to save your high scores.</p>
           )}
           <div className="actions">
             <Link className="button button-play" to="/game">
-              Play now
+              Play Flappy Bird
             </Link>
-            <Link className="button button-secondary" to="/leaderboard">
-              High scores
-            </Link>
+            {user ? (
+              <Link className="button button-secondary" to="/leaderboard">
+                High scores
+              </Link>
+            ) : null}
             {!user && (
               <Link className="button button-pink" to="/signup">
-                Join the flock
+                Join HighScoreHub
               </Link>
             )}
           </div>
@@ -46,7 +48,51 @@ export default function Home() {
       </section>
 
       <section className="howto">
-        <h2>How to play</h2>
+        <h2>Games</h2>
+        <div className="howto-grid">
+          <article className="howto-card card-score">
+            <span aria-hidden="true">🐦</span>
+            <h3>Flappy Bird</h3>
+            <p>Tap or press Space to flap. Dodge the pipes and rack up points.</p>
+            <div className="actions">
+              <Link className="button" to="/game">
+                Play
+              </Link>
+            </div>
+          </article>
+          <article className="howto-card card-tap">
+            <span aria-hidden="true">🎮</span>
+            <h3>More games soon</h3>
+            <p>New HighScoreHub games will land here. Stay tuned!</p>
+          </article>
+          <article className="howto-card card-dodge">
+            <span aria-hidden="true">🏆</span>
+            <h3>Leaderboard</h3>
+            {user ? (
+              <>
+                <p>See who has the top scores and try to take first place.</p>
+                <div className="actions">
+                  <Link className="button button-secondary" to="/leaderboard">
+                    View scores
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <p>Sign in to see high scores and climb the board.</p>
+                <div className="actions">
+                  <Link className="button button-secondary" to="/signin" state={{ from: '/leaderboard' }}>
+                    Sign in
+                  </Link>
+                </div>
+              </>
+            )}
+          </article>
+        </div>
+      </section>
+
+      <section className="howto">
+        <h2>How to play Flappy Bird</h2>
         <div className="howto-grid">
           <article className="howto-card card-tap">
             <span aria-hidden="true">👆</span>

@@ -36,8 +36,8 @@ export default function SignUp() {
 
   return (
     <section className="panel">
-      <p className="eyebrow">New flyer</p>
-      <h1>Join the flock</h1>
+      <p className="eyebrow">New player</p>
+      <h1>Join HighScoreHub</h1>
       <p>Pick a player name so your scores can shine on the board.</p>
       <form className="auth-form" onSubmit={handleSubmit}>
         <label htmlFor="username">Player name</label>

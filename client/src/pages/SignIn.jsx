@@ -36,8 +36,8 @@ export default function SignIn() {
   return (
     <section className="panel">
       <p className="eyebrow">Welcome back</p>
-      <h1>Sign in and fly</h1>
-      <p>Use your email and password to jump back into the sky.</p>
+      <h1>Sign in and play</h1>
+      <p>Use your email and password to get back to HighScoreHub.</p>
       <form className="auth-form" onSubmit={handleSubmit}>
         <label htmlFor="email">Email</label>
         <input
@@ -63,7 +63,7 @@ export default function SignIn() {
       </form>
       {error && <p className="error">{error}</p>}
       <p className="auth-switch">
-        New here? <Link to="/signup" state={{ from: redirectTo }}>Join the flock</Link>
+        New here? <Link to="/signup" state={{ from: redirectTo }}>Join HighScoreHub</Link>
       </p>
     </section>
   );

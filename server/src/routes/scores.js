@@ -54,7 +54,7 @@ function parsePositiveInt(value, fallback) {
   return parsed;
 }
 
-router.get('/top', async (req, res) => {
+router.get('/top', requireAuth, async (req, res) => {
   try {
     const page = parsePositiveInt(req.query.page, 1);
     const limit = Math.min(parsePositiveInt(req.query.limit, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);

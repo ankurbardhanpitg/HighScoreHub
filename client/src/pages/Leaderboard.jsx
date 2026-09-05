@@ -90,7 +90,7 @@ export default function Leaderboard() {
         🏆
       </div>
       <h1>High scores</h1>
-      <p>Newest flights first, {limit} per page. Can you reach the top?</p>
+      <p>Newest scores first, {limit} per page. Can you reach the top?</p>
 
       <div className="page-size">
         <label htmlFor="leaderboard-limit-preset">Scores per page</label>
@@ -134,7 +134,7 @@ export default function Leaderboard() {
       {status === 'error' && <p className="error">{error}</p>}
 
       {status === 'ready' && scores.length === 0 && (
-        <p className="empty-state">No scores yet. Be the first little flyer on the board!</p>
+        <p className="empty-state">No scores yet. Be the first on the HighScoreHub board!</p>
       )}
 
       {scores.length > 0 && (

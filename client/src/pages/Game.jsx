@@ -145,9 +145,11 @@ export default function Game() {
                   <button className="button button-play" type="button" onClick={playAgain}>
                     Play again
                   </button>
-                  <Link className="button button-secondary" to="/leaderboard">
-                    High scores
-                  </Link>
+                  {user ? (
+                    <Link className="button button-secondary" to="/leaderboard">
+                      High scores
+                    </Link>
+                  ) : null}
                 </div>
               </div>
             </div>

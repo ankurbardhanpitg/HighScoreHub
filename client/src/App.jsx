@@ -1,6 +1,7 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import SkyDecor from './components/SkyDecor.jsx';
+import RequireAuth from './components/RequireAuth.jsx';
 import Home from './pages/Home.jsx';
 import Game from './pages/Game.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
@@ -16,16 +17,16 @@ export default function App() {
       <header className="topbar">
         <NavLink to="/" className="brand">
           <span className="brand-mark" aria-hidden="true">
-            🐦
+            🏆
           </span>
-          Flappy Bird
+          HighScoreHub
         </NavLink>
         <nav>
           <NavLink to="/" end>
             Home
           </NavLink>
           <NavLink to="/game">Play</NavLink>
-          <NavLink to="/leaderboard">Scores</NavLink>
+          {ready && user ? <NavLink to="/leaderboard">Scores</NavLink> : null}
           {ready && user ? (
             <span className="nav-user">
               <span className="user-chip" aria-hidden="true">
@@ -48,12 +49,19 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/game" element={<Game />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route
+            path="/leaderboard"
+            element={
+              <RequireAuth>
+                <Leaderboard />
+              </RequireAuth>
+            }
+          />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
         </Routes>
       </main>
-      <footer className="site-footer">Made for little flyers and big smiles</footer>
+      <footer className="site-footer">HighScoreHub — play games, beat high scores</footer>
     </div>
   );
 }

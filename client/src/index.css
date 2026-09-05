@@ -328,7 +328,12 @@ main {
 }
 
 .hero .lede {
-  max-width: 34ch;
+  max-width: 42ch;
+}
+
+.howto-card .actions {
+  justify-content: center;
+  margin-top: 16px;
 }
 
 .welcome-pill {
