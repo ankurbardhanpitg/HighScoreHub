@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import GameSwitcher from '../components/GameSwitcher.jsx';
 import Twenty48Board from '../components/Twenty48Board.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { submitScore } from '../api.js';
@@ -40,6 +39,8 @@ export default function Game2048() {
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
   const [savedAt, setSavedAt] = useState('');
+  const [savedScore, setSavedScore] = useState(null);
+  const [endedReason, setEndedReason] = useState('stuck');
 
   const playStateRef = useRef(playState);
   const tilesRef = useRef(tiles);
@@ -75,6 +76,7 @@ export default function Game2048() {
     setSubmitState('idle');
     setSubmitError('');
     setSavedAt('');
+    setSavedScore(null);
   }, []);
 
   const handleMove = useCallback((direction) => {
@@ -120,6 +122,7 @@ export default function Game2048() {
         setPlayState('won');
       } else if (!canMove(withSpawn)) {
         playStateRef.current = 'ended';
+        setEndedReason('stuck');
         setPlayState('ended');
       }
 
@@ -151,21 +154,29 @@ export default function Game2048() {
   }, []);
 
   function continueAfterWin() {
-    setSubmitState('idle');
-    setSubmitError('');
-    setSavedAt('');
     playStateRef.current = 'playing';
     setPlayState('playing');
     if (!canMove(tilesRef.current)) {
       playStateRef.current = 'ended';
+      setEndedReason('stuck');
       setPlayState('ended');
     }
+  }
+
+  function endRun() {
+    if (playStateRef.current !== 'playing' && playStateRef.current !== 'won') {
+      return;
+    }
+    playStateRef.current = 'ended';
+    setEndedReason('finished');
+    setPlayState('ended');
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!user || submitState === 'saving' || submitState === 'saved') {
+    const currentScore = scoreRef.current;
+    if (!user || currentScore <= 0 || submitState === 'saving' || (submitState === 'saved' && savedScore === currentScore)) {
       return;
     }
 
@@ -173,8 +184,9 @@ export default function Game2048() {
     setSubmitError('');
 
     try {
-      const saved = await submitScore(score, '2048');
+      const saved = await submitScore(currentScore, '2048');
       setSavedAt(saved.createdAt);
+      setSavedScore(currentScore);
       setSubmitState('saved');
     } catch (error) {
       setSubmitState('error');
@@ -183,16 +195,16 @@ export default function Game2048() {
   }
 
   const overlayOpen = playState === 'waiting' || playState === 'won' || playState === 'ended';
+  const alreadySaved = submitState === 'saved' && savedScore === score;
   const kicker =
     playState === 'waiting'
       ? 'Press Start, then slide tiles to merge them'
       : playState === 'playing'
-        ? 'Arrow keys, WASD, or swipe · merge tiles and chase a huge score'
+        ? 'Arrow keys, WASD, or swipe · save your score under the board whenever you like'
         : '';
 
   return (
     <section className="game-wrap">
-      <GameSwitcher />
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
 
       <div className="puzzle-page">
@@ -207,9 +219,16 @@ export default function Game2048() {
               <strong>{best}</strong>
             </div>
           </div>
-          <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
-            New game
-          </button>
+          <div className="puzzle-hud-actions">
+            {playState === 'playing' || playState === 'won' ? (
+              <button className="button button-secondary puzzle-new" type="button" onClick={endRun} disabled={score <= 0}>
+                End run
+              </button>
+            ) : null}
+            <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
+              New game
+            </button>
+          </div>
         </div>
 
         <div className="puzzle-stage">
@@ -237,12 +256,13 @@ export default function Game2048() {
                 <p>Keep sliding for a bigger high score, or save this run now.</p>
                 <ScoreActions
                   user={user}
+                  score={score}
                   scorePath="/game/2048"
                   submitState={submitState}
                   submitError={submitError}
                   savedAt={savedAt}
+                  alreadySaved={alreadySaved}
                   onSubmit={handleSubmit}
-                  successText="Saved on"
                 />
                 <div className="actions">
                   <button className="button button-play" type="button" onClick={continueAfterWin}>
@@ -259,16 +279,17 @@ export default function Game2048() {
           {playState === 'ended' && (
             <div className="overlay">
               <div className="panel overlay-panel">
-                <h2>No more moves!</h2>
+                <h2>{endedReason === 'finished' ? 'Run finished!' : 'No more moves!'}</h2>
                 <p className="final-score">You scored {score}!</p>
                 <ScoreActions
                   user={user}
+                  score={score}
                   scorePath="/game/2048"
                   submitState={submitState}
                   submitError={submitError}
                   savedAt={savedAt}
+                  alreadySaved={alreadySaved}
                   onSubmit={handleSubmit}
-                  successText="Saved on"
                 />
                 <div className="actions">
                   <button className="button button-play" type="button" onClick={startGame}>
@@ -284,39 +305,78 @@ export default function Game2048() {
             </div>
           )}
         </div>
+
+        {playState !== 'waiting' ? (
+          <div className="puzzle-save">
+            <h3>Save this score</h3>
+            <p className="final-score puzzle-save-score">{score}</p>
+            <ScoreActions
+              user={user}
+              score={score}
+              scorePath="/game/2048"
+              submitState={submitState}
+              submitError={submitError}
+              savedAt={savedAt}
+              alreadySaved={alreadySaved}
+              onSubmit={handleSubmit}
+            />
+            {user ? (
+              <div className="actions">
+                <Link className="button button-secondary" to="/leaderboard?game=2048">
+                  High scores
+                </Link>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </section>
   );
 }
 
-function ScoreActions({ user, scorePath, submitState, submitError, savedAt, onSubmit, successText }) {
+function ScoreActions({
+  user,
+  score,
+  scorePath,
+  submitState,
+  submitError,
+  savedAt,
+  alreadySaved,
+  onSubmit,
+}) {
+  const saveDisabled = submitState === 'saving' || alreadySaved || score <= 0;
+
   return (
     <>
       {user ? (
         <form onSubmit={onSubmit} className="score-form">
-          <p>Save this score as {user.username}?</p>
-          <button className="button" type="submit" disabled={submitState === 'saving' || submitState === 'saved'}>
-            {submitState === 'saved' ? 'Score saved!' : submitState === 'saving' ? 'Saving...' : 'Save my score'}
+          <p>
+            {score <= 0
+              ? 'Merge tiles to earn a score, then save it here.'
+              : alreadySaved
+                ? `Saved ${score} as ${user.username}. Keep going to beat it!`
+                : `Save ${score} as ${user.username}?`}
+          </p>
+          <button className="button" type="submit" disabled={saveDisabled}>
+            {alreadySaved ? 'Score saved!' : submitState === 'saving' ? 'Saving...' : 'Save my score'}
           </button>
         </form>
       ) : (
         <div className="score-form">
-          <p>Sign in to put this score on the board.</p>
+          <p>Sign in to put this score on the 2048 board.</p>
           <div className="actions">
             <Link className="button" to="/signin" state={{ from: scorePath }}>
               Sign in
             </Link>
             <Link className="button button-pink" to="/signup" state={{ from: scorePath }}>
-              Join in
+              Sign up
             </Link>
           </div>
         </div>
       )}
       {submitError && <p className="error">{submitError}</p>}
-      {submitState === 'saved' && savedAt && (
-        <p className="success">
-          {successText} {formatScoreDate(savedAt)}. Nice merge!
-        </p>
+      {alreadySaved && savedAt && (
+        <p className="success">Saved on {formatScoreDate(savedAt)}. Nice merge!</p>
       )}
     </>
   );

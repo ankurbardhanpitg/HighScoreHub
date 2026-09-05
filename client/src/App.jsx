@@ -46,7 +46,7 @@ export default function App() {
           ) : (
             <>
               <NavLink to="/signin">Sign in</NavLink>
-              <NavLink to="/signup">Join in</NavLink>
+              <NavLink to="/signup">Sign up</NavLink>
             </>
           )}
         </nav>

@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import GameContainer from '../components/GameContainer.jsx';
-import GameSwitcher from '../components/GameSwitcher.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
@@ -67,7 +66,6 @@ export default function Game() {
 
   return (
     <section className="game-wrap">
-      <GameSwitcher />
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
       <div className="game-page">
         <div className="game-stage">
@@ -133,7 +131,7 @@ export default function Game() {
                         Sign in
                       </Link>
                       <Link className="button button-pink" to="/signup" state={{ from: '/game' }}>
-                        Join in
+                        Sign up
                       </Link>
                     </div>
                   </div>
