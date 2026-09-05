@@ -594,6 +594,10 @@ main {
   background: #e8dcff;
 }
 
+.card-breakout span {
+  background: #ffe0c2;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -745,6 +749,17 @@ main {
 .pong-stage {
   background: linear-gradient(180deg, #fff, #ece4ff);
   box-shadow: var(--shadow), 0 10px 0 #6d45c8;
+}
+
+.breakout-canvas {
+  background: #16324f;
+  touch-action: none;
+  user-select: none;
+}
+
+.breakout-stage {
+  background: linear-gradient(180deg, #fff, #ffe8d2);
+  box-shadow: var(--shadow), 0 10px 0 #e07a2f;
 }
 
 .pause-fab {

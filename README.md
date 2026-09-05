@@ -8,6 +8,7 @@ Games on the hub:
 - 2048 (slide tiles, merge matching numbers, chase a high score)
 - Whack-a-Mole (tap moles as they pop up, 30-second reflex round)
 - Pong (one player vs the computer, first to 5)
+- Breakout (aim the ball, bounce it off the paddle, smash the bricks)
 
 ## Project structure
 
@@ -59,7 +60,7 @@ Auth:
 
 Scores:
 
-- `POST /api/scores` — body `{ "score": 12, "game": "flappy" }`, requires a signed-in user. The player name is taken from the account username. `game` can be `"flappy"`, `"2048"`, `"whack"`, or `"pong"` and defaults to `"flappy"`.
+- `POST /api/scores` — body `{ "score": 12, "game": "flappy" }`, requires a signed-in user. The player name is taken from the account username. `game` can be `"flappy"`, `"2048"`, `"whack"`, `"pong"`, or `"breakout"` and defaults to `"flappy"`.
 - `GET /api/scores/top?page=1&limit=10&game=flappy` — paginated scores for one game, newest date first. Requires a signed-in user. Defaults to page 1, 10 records, and the Flappy Bird board.
 
 ## Run the client

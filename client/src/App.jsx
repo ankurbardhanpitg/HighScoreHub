@@ -8,6 +8,7 @@ import Game from './pages/Game.jsx';
 import Game2048 from './pages/Game2048.jsx';
 import GameWhack from './pages/GameWhack.jsx';
 import GamePong from './pages/GamePong.jsx';
+import GameBreakout from './pages/GameBreakout.jsx';
 import HowTo from './pages/HowTo.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import SignIn from './pages/SignIn.jsx';
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="/game/2048" element={<Game2048 />} />
           <Route path="/game/whack" element={<GameWhack />} />
           <Route path="/game/pong" element={<GamePong />} />
+          <Route path="/game/breakout" element={<GameBreakout />} />
           <Route
             path="/leaderboard"
             element={

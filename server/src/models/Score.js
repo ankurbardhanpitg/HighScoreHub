@@ -16,7 +16,7 @@ const scoreSchema = new mongoose.Schema({
   },
   game: {
     type: String,
-    enum: ['flappy', '2048', 'whack', 'pong'],
+    enum: ['flappy', '2048', 'whack', 'pong', 'breakout'],
     default: 'flappy',
     index: true,
   },

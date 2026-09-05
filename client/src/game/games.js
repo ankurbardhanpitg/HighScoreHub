@@ -59,6 +59,21 @@ export const GAMES = [
       { emoji: '⭐', title: 'First to 5', text: 'Every ball the computer misses is a point. Reach 5 before the CPU does!', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'breakout',
+    name: 'Breakout',
+    shortName: 'Breakout',
+    path: '/game/breakout',
+    howToPath: '/howto/breakout',
+    emoji: '🧱',
+    cardClass: 'card-breakout',
+    blurb: 'Aim the ball, bounce it off the paddle, and smash every brick. Steeper angles, smarter shots.',
+    steps: [
+      { emoji: '🎯', title: 'Aim your shot', text: 'Move the paddle to point the dotted line. That line is the path the ball will take.', cardClass: 'card-tap' },
+      { emoji: '📐', title: 'Use the angle', text: 'Hit the ball with the edge of the paddle to send it sideways. Bank it off a wall to reach tricky bricks.', cardClass: 'card-breakout' },
+      { emoji: '🧱', title: 'Clear the wall', text: 'Break every brick to go up a level. Combos and bank shots score extra. Don’t let the ball fall!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';
