@@ -433,6 +433,17 @@ main {
   box-shadow: 0 4px 0 #3d9a2a;
 }
 
+.button-purple {
+  background: linear-gradient(180deg, #c4a0ff, var(--candy-purple));
+  color: #fff;
+  box-shadow: 0 6px 0 #6d45c8;
+}
+
+.button-purple:hover:not(:disabled) {
+  background: linear-gradient(180deg, #c4a0ff, var(--candy-purple));
+  box-shadow: 0 4px 0 #6d45c8;
+}
+
 .mascot-wrap {
   display: grid;
   place-items: center;
@@ -639,6 +650,10 @@ main {
   background: #d8f5d3;
 }
 
+.card-pong span {
+  background: #e8dcff;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -779,6 +794,17 @@ main {
 .game-canvas canvas {
   display: block;
   border-radius: 24px;
+}
+
+.pong-canvas {
+  background: #1f4e79;
+  touch-action: none;
+  user-select: none;
+}
+
+.pong-stage {
+  background: linear-gradient(180deg, #fff, #ece4ff);
+  box-shadow: var(--shadow), 0 10px 0 #6d45c8;
 }
 
 .pause-fab {

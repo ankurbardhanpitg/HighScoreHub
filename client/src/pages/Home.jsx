@@ -14,7 +14,7 @@ export default function Home() {
             Welcome to <span className="highlight">HighScoreHub</span>
           </h1>
           <p className="lede">
-            Play fun games, save your scores, and climb the leaderboard. Flappy Bird, 2048, and Whack-a-Mole are ready to play.
+            Play fun games, save your scores, and climb the leaderboard. Flappy Bird, 2048, Whack-a-Mole, and Pong are ready to play.
           </p>
           {user ? (
             <p className="welcome-pill">Hi {user.username}! Ready to beat your high score?</p>
@@ -30,6 +30,9 @@ export default function Home() {
             </Link>
             <Link className="button button-grass" to="/game/whack">
               Play Whack-a-Mole
+            </Link>
+            <Link className="button button-purple" to="/game/pong">
+              Play Pong
             </Link>
             {user ? (
               <Link className="button button-secondary" to="/leaderboard">
@@ -72,29 +75,6 @@ export default function Home() {
               </div>
             </article>
           ))}
-          <article className="howto-card card-dodge">
-            <span aria-hidden="true">🏆</span>
-            <h3>Leaderboard</h3>
-            {user ? (
-              <>
-                <p>See who has the top scores and try to take first place.</p>
-                <div className="actions">
-                  <Link className="button button-secondary" to="/leaderboard">
-                    View scores
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <p>Sign in to see high scores and climb the board.</p>
-                <div className="actions">
-                  <Link className="button button-secondary" to="/signin" state={{ from: '/leaderboard' }}>
-                    Sign in
-                  </Link>
-                </div>
-              </>
-            )}
-          </article>
         </div>
       </section>
     </>

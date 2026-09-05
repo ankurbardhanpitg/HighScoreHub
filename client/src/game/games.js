@@ -44,6 +44,21 @@ export const GAMES = [
       { emoji: '⏱️', title: 'Beat the clock', text: 'Set the time limit, then tap moles before they hide. Every hit is a point.', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'pong',
+    name: 'Pong',
+    shortName: 'Pong',
+    path: '/game/pong',
+    howToPath: '/howto/pong',
+    emoji: '🏓',
+    cardClass: 'card-pong',
+    blurb: 'One player vs the computer. Move your paddle, bounce the ball, first to 5 wins.',
+    steps: [
+      { emoji: '👆', title: 'Move your paddle', text: 'Slide a finger, move the mouse, or use the arrow keys. Your paddle is the pink one on the left.', cardClass: 'card-tap' },
+      { emoji: '🏓', title: 'Hit the ball', text: 'Bounce it past the blue computer paddle. Aim with the edge of your paddle to send it up or down.', cardClass: 'card-pong' },
+      { emoji: '⭐', title: 'First to 5', text: 'Every ball the computer misses is a point. Reach 5 before the CPU does!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';
