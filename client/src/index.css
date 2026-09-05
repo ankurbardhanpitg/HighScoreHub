@@ -1,0 +1,224 @@
+:root {
+  --ink: #1f2a30;
+  --muted: #5b6b73;
+  --sky: #70c5ce;
+  --panel: #ffffff;
+  --line: #d7e0e4;
+  --accent: #2d8a3e;
+  --accent-hover: #246f32;
+  --danger: #b42318;
+  --ok: #17663a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  background: #eef4f6;
+}
+
+a {
+  color: inherit;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+nav {
+  display: flex;
+  gap: 14px;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--muted);
+}
+
+nav a.active {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-signout {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.nav-signout:hover {
+  color: var(--ink);
+}
+
+.auth-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.auth-switch {
+  margin-top: 16px;
+}
+
+main {
+  padding: 24px 16px 40px;
+}
+
+.panel {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.home-panel {
+  text-align: center;
+}
+
+.home-panel p,
+.panel p {
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.button {
+  display: inline-block;
+  border: 0;
+  background: var(--accent);
+  color: #ffffff;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.button-secondary {
+  background: #4b5b63;
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: #3c4a51;
+}
+
+.game-page {
+  position: relative;
+  width: 400px;
+  margin: 0 auto;
+}
+
+.game-canvas {
+  width: 400px;
+  height: 600px;
+  background: var(--sky);
+  border: 1px solid var(--line);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 28, 32, 0.45);
+  padding: 16px;
+}
+
+.overlay-panel {
+  width: 100%;
+  margin: 0;
+}
+
+.final-score {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.score-form {
+  display: grid;
+  gap: 8px;
+}
+
+.score-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.success {
+  color: var(--ok);
+}
