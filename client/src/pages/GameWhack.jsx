@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import WhackBoard from '../components/WhackBoard.jsx';
+import QuitGameButton from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
@@ -301,11 +302,14 @@ export default function GameWhack() {
               <strong>{best}</strong>
             </div>
           </div>
-          {playing ? (
-            <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
-              Restart
-            </button>
-          ) : null}
+          <div className="puzzle-hud-actions">
+            {playing ? (
+              <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
+                Restart
+              </button>
+            ) : null}
+            <QuitGameButton className="button button-secondary puzzle-new" />
+          </div>
         </div>
 
         <TimeLimitControl seconds={roundSeconds} disabled={playing} onChange={changeRound} />
@@ -332,6 +336,7 @@ export default function GameWhack() {
                   <Link className="button button-secondary" to="/howto/whack" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
+                  <QuitGameButton />
                 </div>
               </div>
             </div>
@@ -379,6 +384,7 @@ export default function GameWhack() {
                       High scores
                     </Link>
                   ) : null}
+                  <QuitGameButton />
                 </div>
               </div>
             </div>

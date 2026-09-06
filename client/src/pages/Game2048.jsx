@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Twenty48Board from '../components/Twenty48Board.jsx';
+import QuitGameButton from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
@@ -251,6 +252,7 @@ export default function Game2048() {
             <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
               New game
             </button>
+            <QuitGameButton className="button button-secondary puzzle-new" />
           </div>
         </div>
 
@@ -269,6 +271,7 @@ export default function Game2048() {
                   <Link className="button button-secondary" to="/howto/2048" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
+                  <QuitGameButton />
                 </div>
               </div>
             </div>
@@ -326,6 +329,7 @@ export default function Game2048() {
                       High scores
                     </Link>
                   ) : null}
+                  <QuitGameButton />
                 </div>
               </div>
             </div>

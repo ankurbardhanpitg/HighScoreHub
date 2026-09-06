@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PongContainer from '../components/PongContainer.jsx';
+import QuitGameButton, { GamePlayFabs } from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
@@ -81,11 +82,7 @@ export default function GamePong() {
             onStateChange={setPlayState}
           />
 
-          {playState === 'playing' && (
-            <button className="button button-pink pause-fab" type="button" onClick={() => gameRef.current?.pause()}>
-              Pause
-            </button>
-          )}
+          {playState === 'playing' && <GamePlayFabs onPause={() => gameRef.current?.pause()} />}
 
           {playState === 'waiting' && (
             <div className="overlay" onClick={() => gameRef.current?.start()}>
@@ -101,6 +98,7 @@ export default function GamePong() {
                   <Link className="button button-secondary" to="/howto/pong" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
+                  <QuitGameButton />
                 </div>
               </div>
             </div>
@@ -115,6 +113,7 @@ export default function GamePong() {
                   <button className="button button-play" type="button" onClick={() => gameRef.current?.resume()}>
                     Resume
                   </button>
+                  <QuitGameButton />
                 </div>
               </div>
             </div>
@@ -163,6 +162,7 @@ export default function GamePong() {
                       High scores
                     </Link>
                   ) : null}
+                  <QuitGameButton />
                 </div>
               </div>
             </div>

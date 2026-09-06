@@ -1096,11 +1096,16 @@ main {
   box-shadow: var(--shadow), 0 10px 0 #6d45c8;
 }
 
-.pause-fab {
+.game-fabs {
   position: absolute;
   top: 22px;
   right: 22px;
   z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+
+.game-fabs .button {
   min-height: 44px;
   padding: 8px 18px;
   font-size: 1rem;
