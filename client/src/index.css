@@ -920,6 +920,10 @@ main {
   background: #ffe1ea;
 }
 
+.card-snake span {
+  background: #d8f5d3;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -1110,6 +1114,17 @@ main {
 .bubble-stage {
   background: linear-gradient(180deg, #fff, #f3e4ff);
   box-shadow: var(--shadow), 0 10px 0 #9b6dff;
+}
+
+.snake-canvas {
+  background: #1d4d3a;
+  touch-action: none;
+  user-select: none;
+}
+
+.snake-stage {
+  background: linear-gradient(180deg, #fff, #e4f8e8);
+  box-shadow: var(--shadow), 0 10px 0 #3d9a2a;
 }
 
 .game-fabs {

@@ -104,6 +104,21 @@ export const GAMES = [
       { emoji: '⬇️', title: 'Watch the drop', text: 'After a few shots, a new row slides in. Don’t let bubbles cross the pink line!', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'snake',
+    name: 'Snake',
+    shortName: 'Snake',
+    path: '/game/snake',
+    howToPath: '/howto/snake',
+    emoji: '🐍',
+    cardClass: 'card-snake',
+    blurb: 'Steer the snake, eat apples, and grow. Don’t hit a wall or your own tail.',
+    steps: [
+      { emoji: '➡️', title: 'Steer', text: 'Use arrow keys, WASD, or a swipe. You can’t turn straight back on yourself.', cardClass: 'card-tap' },
+      { emoji: '🍎', title: 'Eat apples', text: 'Each pink apple makes the snake longer and adds to your score.', cardClass: 'card-snake' },
+      { emoji: '🏁', title: 'Keep growing', text: 'Every 5 apples you speed up a level. Don’t bump the edge or your tail!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';
