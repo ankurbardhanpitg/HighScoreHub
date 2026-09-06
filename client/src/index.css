@@ -1137,6 +1137,10 @@ main {
   color: var(--candy-pink);
 }
 
+.overlay-win h2 {
+  color: var(--ok);
+}
+
 .final-score {
   margin: 8px 0 16px !important;
   font-family: var(--font-display);

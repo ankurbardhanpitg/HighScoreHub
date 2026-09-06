@@ -63,13 +63,30 @@ function createFlappyAudio() {
       beep({ type: 'square', freq: 180, freqEnd: 70, duration: 0.28, volume: 0.09 });
       beep({ type: 'triangle', freq: 140, freqEnd: 50, duration: 0.4, volume: 0.08, delay: 0.04 });
     },
+    level() {
+      beep({ type: 'sine', freq: 523, duration: 0.09, volume: 0.08 });
+      beep({ type: 'sine', freq: 659, duration: 0.09, volume: 0.08, delay: 0.09 });
+      beep({ type: 'sine', freq: 784, duration: 0.16, volume: 0.09, delay: 0.18 });
+    },
+    win() {
+      beep({ type: 'sine', freq: 523, duration: 0.12, volume: 0.08 });
+      beep({ type: 'sine', freq: 659, duration: 0.12, volume: 0.08, delay: 0.12 });
+      beep({ type: 'sine', freq: 784, duration: 0.12, volume: 0.09, delay: 0.24 });
+      beep({ type: 'sine', freq: 1046, duration: 0.28, volume: 0.1, delay: 0.36 });
+    },
   };
 }
 
 const PIPE_WIDTH = 64;
-const PIPE_GAP = 180;
-const PIPE_SPEED = 120;
-const SPAWN_INTERVAL = 2200;
+const PIPES_PER_LEVEL = 20;
+const MAX_LEVEL = 5;
+const LEVELS = [
+  { gap: 196, speed: 100, spawn: 2400 },
+  { gap: 176, speed: 122, spawn: 2100 },
+  { gap: 156, speed: 148, spawn: 1800 },
+  { gap: 138, speed: 176, spawn: 1520 },
+  { gap: 120, speed: 208, spawn: 1280 },
+];
 const FLAP_VELOCITY = -150;
 const BIRD_RADIUS = 14;
 const GROUND_HEIGHT = 20;
@@ -81,12 +98,17 @@ export default class FlappyScene extends Phaser.Scene {
 
   create() {
     this.ended = false;
+    this.won = false;
     this.playState = 'waiting';
     this.score = 0;
+    this.level = 1;
+    this.levelPipes = 0;
+    this.spawnedThisLevel = 0;
     this.nextPipeId = 1;
     this.ignoreFlapUntil = 0;
     this.spawnEvent = null;
     this.audio = createFlappyAudio();
+    this.applyLevelSettings();
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x7ed8f2);
 
@@ -141,6 +163,27 @@ export default class FlappyScene extends Phaser.Scene {
       strokeThickness: 6,
     });
     this.scoreText.setDepth(10);
+
+    this.levelText = this.add.text(GAME_WIDTH / 2, 28, 'Level 1', {
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '22px',
+      color: '#ffe566',
+      stroke: '#1f4e79',
+      strokeThickness: 6,
+    });
+    this.levelText.setOrigin(0.5, 0.5);
+    this.levelText.setDepth(10);
+
+    this.bannerText = this.add.text(GAME_WIDTH / 2, 96, '', {
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '32px',
+      color: '#ffe566',
+      stroke: '#1f4e79',
+      strokeThickness: 8,
+    });
+    this.bannerText.setOrigin(0.5);
+    this.bannerText.setDepth(12);
+    this.bannerText.setVisible(false);
 
     this.hintText = this.add.text(GAME_WIDTH / 2, 80, 'Press Start when you are ready!', {
       fontFamily: 'Arial, sans-serif',
@@ -201,14 +244,61 @@ export default class FlappyScene extends Phaser.Scene {
     this.bird.body.setVelocityY(FLAP_VELOCITY);
     this.ignoreFlapUntil = this.time.now + 180;
 
+    this.notifyState('playing');
+    this.restartSpawnTimer();
+    this.spawnPipes();
+  }
+
+  applyLevelSettings() {
+    const settings = LEVELS[this.level - 1] || LEVELS[0];
+    this.pipeGap = settings.gap;
+    this.pipeSpeed = settings.speed;
+    this.pipeSpawn = settings.spawn;
+  }
+
+  restartSpawnTimer() {
+    this.spawnEvent?.remove(false);
     this.spawnEvent = this.time.addEvent({
-      delay: SPAWN_INTERVAL,
+      delay: this.pipeSpawn,
       callback: this.spawnPipes,
       callbackScope: this,
       loop: true,
     });
+  }
+
+  showBanner(message) {
+    this.tweens.killTweensOf(this.bannerText);
+    this.bannerText.setText(message);
+    this.bannerText.setVisible(true);
+    this.bannerText.setAlpha(1);
+    this.tweens.add({
+      targets: this.bannerText,
+      alpha: 0,
+      duration: 360,
+      delay: 1100,
+      onComplete: () => {
+        if (!this.ended) {
+          this.bannerText.setVisible(false);
+        }
+      },
+    });
+  }
+
+  advanceLevel() {
+    this.level += 1;
+    this.levelPipes = 0;
+    this.spawnedThisLevel = 0;
+    this.applyLevelSettings();
+    this.levelText.setText(`Level ${this.level}`);
+    this.pipes.getChildren().forEach((pipe) => {
+      if (pipe.body) {
+        pipe.body.setVelocityX(-this.pipeSpeed);
+      }
+    });
+    this.restartSpawnTimer();
     this.spawnPipes();
-    this.notifyState('playing');
+    this.showBanner(`Level ${this.level}!`);
+    this.audio.level();
   }
 
   pauseGame() {
@@ -281,12 +371,18 @@ export default class FlappyScene extends Phaser.Scene {
       return;
     }
 
+    if (this.spawnedThisLevel >= PIPES_PER_LEVEL) {
+      return;
+    }
+
+    this.spawnedThisLevel += 1;
+
     const minPipeHeight = 36;
-    const minGapCenter = PIPE_GAP / 2 + minPipeHeight;
-    const maxGapCenter = GAME_HEIGHT - GROUND_HEIGHT - PIPE_GAP / 2 - minPipeHeight;
+    const minGapCenter = this.pipeGap / 2 + minPipeHeight;
+    const maxGapCenter = GAME_HEIGHT - GROUND_HEIGHT - this.pipeGap / 2 - minPipeHeight;
     const gapCenter = Phaser.Math.Between(minGapCenter, maxGapCenter);
-    const topHeight = gapCenter - PIPE_GAP / 2;
-    const bottomTop = gapCenter + PIPE_GAP / 2;
+    const topHeight = gapCenter - this.pipeGap / 2;
+    const bottomTop = gapCenter + this.pipeGap / 2;
     const bottomHeight = GAME_HEIGHT - GROUND_HEIGHT - bottomTop;
     const x = GAME_WIDTH + PIPE_WIDTH / 2;
     const pipeId = this.nextPipeId;
@@ -322,7 +418,7 @@ export default class FlappyScene extends Phaser.Scene {
     [topPipe, bottomPipe].forEach((pipe) => {
       pipe.body.setAllowGravity(false);
       pipe.body.setImmovable(true);
-      pipe.body.setVelocityX(-PIPE_SPEED);
+      pipe.body.setVelocityX(-this.pipeSpeed);
     });
 
     topPipe.cap = topCap;
@@ -351,7 +447,7 @@ export default class FlappyScene extends Phaser.Scene {
     this.birdBeak.y = this.bird.y + 2;
 
     this.pipes.getChildren().forEach((pipe) => {
-      if (!pipe.active) {
+      if (!pipe.active || this.ended) {
         return;
       }
 
@@ -362,8 +458,17 @@ export default class FlappyScene extends Phaser.Scene {
       if (!pipe.scored && pipe.x + PIPE_WIDTH / 2 < this.bird.x) {
         pipe.scored = true;
         this.score += 1;
+        this.levelPipes += 1;
         this.scoreText.setText(`Score: ${this.score}`);
         this.audio.score();
+
+        if (this.levelPipes >= PIPES_PER_LEVEL) {
+          if (this.level >= MAX_LEVEL) {
+            this.winGame();
+            return;
+          }
+          this.advanceLevel();
+        }
       }
 
       if (pipe.x < -PIPE_WIDTH) {
@@ -373,20 +478,42 @@ export default class FlappyScene extends Phaser.Scene {
     });
   }
 
-  endGame() {
+  finishRun(won) {
     if (this.ended) {
       return;
     }
 
     this.ended = true;
+    this.won = won;
     this.physics.pause();
     this.spawnEvent?.remove(false);
-    this.audio.hit();
+    this.tweens.killTweensOf(this.bannerText);
     this.notifyState('ended');
 
     const onGameOver = this.registry.get('onGameOver');
     if (typeof onGameOver === 'function') {
-      onGameOver(this.score);
+      onGameOver(this.score, this.level, won);
     }
+  }
+
+  winGame() {
+    if (this.ended) {
+      return;
+    }
+
+    this.audio.win();
+    this.bannerText.setText('You win!');
+    this.bannerText.setVisible(true);
+    this.bannerText.setAlpha(1);
+    this.finishRun(true);
+  }
+
+  endGame() {
+    if (this.ended) {
+      return;
+    }
+
+    this.audio.hit();
+    this.finishRun(false);
   }
 }

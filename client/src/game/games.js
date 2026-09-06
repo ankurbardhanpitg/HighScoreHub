@@ -7,11 +7,11 @@ export const GAMES = [
     howToPath: '/howto/flappy',
     emoji: '🐦',
     cardClass: 'card-score',
-    blurb: 'Tap or press Space to flap. Dodge the pipes and rack up points.',
+    blurb: 'Tap or press Space to flap. Clear 20 pipes to go up a level, then beat all 5 levels to win.',
     steps: [
       { emoji: '👆', title: 'Tap or Space', text: 'Give the bird a flap whenever it starts to fall.', cardClass: 'card-tap' },
       { emoji: '🌿', title: 'Dodge pipes', text: 'Fly through the green openings. Don’t bump the edges!', cardClass: 'card-dodge' },
-      { emoji: '⭐', title: 'Score points', text: 'Each pipe you pass is a point. Beat your friends!', cardClass: 'card-score' },
+      { emoji: '🏁', title: 'Beat 5 levels', text: 'Each pipe is a point. Pass 20 pipes to level up — later levels are faster and tighter. Clear all 5 to win!', cardClass: 'card-score' },
     ],
   },
   {

@@ -50,8 +50,8 @@ const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateCha
     };
 
     const game = new Phaser.Game(config);
-    game.registry.set('onGameOver', (score) => {
-      onGameOverRef.current?.(score);
+    game.registry.set('onGameOver', (score, level, won) => {
+      onGameOverRef.current?.(score, level, won);
     });
     game.registry.set('onStateChange', (state) => {
       onStateChangeRef.current?.(state);

@@ -12,12 +12,16 @@ export default function Game() {
   const [playState, setPlayState] = useState('waiting');
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [won, setWon] = useState(false);
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
   const [savedAt, setSavedAt] = useState('');
 
-  const handleGameOver = useCallback((finalScore) => {
+  const handleGameOver = useCallback((finalScore, finalLevel = 1, didWin = false) => {
     setScore(finalScore);
+    setLevel(finalLevel);
+    setWon(didWin);
     setIsGameOver(true);
     setPlayState('ended');
     setSubmitState('idle');
@@ -29,6 +33,8 @@ export default function Game() {
     setIsGameOver(false);
     setPlayState('waiting');
     setScore(0);
+    setLevel(1);
+    setWon(false);
     setSubmitState('idle');
     setSubmitError('');
     setSavedAt('');
@@ -61,7 +67,7 @@ export default function Game() {
       : playState === 'paused'
         ? 'Game paused — press Resume to keep flying'
         : playState === 'playing'
-          ? 'Tap the game or press Space to flap · P or Esc to pause'
+          ? 'Tap the game or press Space to flap · 20 pipes per level · P or Esc to pause'
           : '';
 
   return (
@@ -86,7 +92,7 @@ export default function Game() {
             <div className="overlay" onClick={() => gameRef.current?.start()}>
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
-                <p>Tap Start, then flap to fly through the pipes.</p>
+                <p>Clear 20 pipes to go up a level. Beat all 5 levels to win!</p>
                 <div className="actions">
                   <button className="button button-play" type="button">
                     Start
@@ -115,9 +121,14 @@ export default function Game() {
 
           {isGameOver && (
             <div className="overlay">
-              <div className="panel overlay-panel">
-                <h2>Oh no!</h2>
+              <div className={`panel overlay-panel${won ? ' overlay-win' : ''}`}>
+                <h2>{won ? 'You win!' : 'Oh no!'}</h2>
                 <p className="final-score">You scored {score}!</p>
+                <p>
+                  {won
+                    ? 'You cleared all 5 levels. What a flight!'
+                    : `You reached level ${level}. Want to try for the next one?`}
+                </p>
 
                 {user ? (
                   <form onSubmit={handleSubmit} className="score-form">
