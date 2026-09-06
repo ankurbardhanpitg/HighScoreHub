@@ -91,7 +91,10 @@ const ORIGIN_Y = HUD_TOP + R + 6;
 const SHOOTER_X = GAME_WIDTH / 2;
 const SHOOTER_Y = GAME_HEIGHT - 28;
 const DANGER_Y = GAME_HEIGHT - 72;
-const SHOT_SPEED = 460;
+const SHOT_SPEED = 420;
+const SHOT_STEP = 6;
+const HIT_RANGE = R * 2 + 3;
+const CEILING_Y = ORIGIN_Y - R;
 const MAX_AIM = Phaser.Math.DegToRad(78);
 const AIM_TURN = 2.4;
 const COLORS = [0xff6b9d, 0xff8a3d, 0xffe566, 0x7ed957, 0x4da3ff];
@@ -280,6 +283,8 @@ export default class BubbleShooterScene extends Phaser.Scene {
     }
 
     this.audio.unlock();
+    this.time.paused = false;
+    this.tweens.resumeAll();
     this.notifyState('playing');
     this.phase = 'ready';
     this.hintText.setVisible(true);
@@ -501,56 +506,80 @@ export default class BubbleShooterScene extends Phaser.Scene {
   }
 
   clusterHitAt(x, y) {
-    const limit = R * 2 - 2;
+    let best = null;
+    let bestDistance = HIT_RANGE;
     for (const bubble of this.bubbles.values()) {
-      if (Phaser.Math.Distance.Between(x, y, bubble.visual.x, bubble.visual.y) < limit) {
-        return bubble;
+      const distance = Phaser.Math.Distance.Between(x, y, bubble.visual.x, bubble.visual.y);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = bubble;
       }
     }
-    return null;
+    return best;
   }
 
   positionToCell(x, y) {
-    const row = Math.max(0, Math.round((y - ORIGIN_Y) / ROW_H));
+    const row = Phaser.Math.Clamp(Math.round((y - ORIGIN_Y) / ROW_H), 0, MAX_ROWS - 1);
     const odd = this.oddForRow(row);
     const col = Math.round((x - ORIGIN_X - (odd ? SPACING / 2 : 0)) / SPACING);
-    return { row, col: Math.max(0, col) };
+    return { row, col: Phaser.Math.Clamp(col, 0, Math.max(0, this.colsInRow(row) - 1)) };
   }
 
-  pickSnapCell(x, y, hit) {
-    const candidates = [];
-    const consider = (row, col) => {
-      if (!this.isValidCell(row, col) || this.getBubble(row, col)) {
-        return;
-      }
-      const point = this.cellCenter(row, col);
-      if (point.y + R >= SHOOTER_Y - 8) {
-        return;
-      }
-      candidates.push({
-        row,
-        col,
-        d: Phaser.Math.Distance.Between(x, y, point.x, point.y),
-      });
-    };
-
-    if (hit) {
-      this.neighbors(hit.row, hit.col).forEach(([row, col]) => consider(row, col));
+  considerSnapCell(candidates, seen, x, y, row, col) {
+    const key = cellKey(row, col);
+    if (seen.has(key) || !this.isValidCell(row, col) || this.getBubble(row, col)) {
+      return;
     }
+    seen.add(key);
+    const point = this.cellCenter(row, col);
+    candidates.push({
+      row,
+      col,
+      y: point.y,
+      d: Phaser.Math.Distance.Between(x, y, point.x, point.y),
+    });
+  }
 
-    const approx = this.positionToCell(x, y);
-    consider(approx.row, approx.col);
-    this.neighbors(approx.row, approx.col).forEach(([row, col]) => consider(row, col));
-    for (let col = 0; col < this.colsInRow(0); col += 1) {
-      consider(0, col);
-    }
-
+  pickBestCandidate(candidates) {
     if (candidates.length === 0) {
       return null;
     }
+    const safe = candidates.filter((cell) => cell.y + R < DANGER_Y);
+    const pool = safe.length > 0 ? safe : candidates;
+    pool.sort((a, b) => a.d - b.d);
+    return pool[0];
+  }
 
-    candidates.sort((a, b) => a.d - b.d);
-    return candidates[0];
+  pickSnapCell(x, y, hit) {
+    const seen = new Set();
+    const nearHit = [];
+    if (hit) {
+      this.neighbors(hit.row, hit.col).forEach(([row, col]) => {
+        this.considerSnapCell(nearHit, seen, x, y, row, col);
+      });
+      const bestNear = this.pickBestCandidate(nearHit);
+      if (bestNear) {
+        return bestNear;
+      }
+    }
+
+    const candidates = nearHit;
+    this.bubbles.forEach((bubble) => {
+      this.neighbors(bubble.row, bubble.col).forEach(([row, col]) => {
+        this.considerSnapCell(candidates, seen, x, y, row, col);
+      });
+    });
+    for (let col = 0; col < this.colsInRow(0); col += 1) {
+      this.considerSnapCell(candidates, seen, x, y, 0, col);
+    }
+
+    const approx = this.positionToCell(x, y);
+    this.considerSnapCell(candidates, seen, x, y, approx.row, approx.col);
+    this.neighbors(approx.row, approx.col).forEach(([row, col]) => {
+      this.considerSnapCell(candidates, seen, x, y, row, col);
+    });
+
+    return this.pickBestCandidate(candidates);
   }
 
   sameColorGroup(row, col) {
@@ -648,6 +677,16 @@ export default class BubbleShooterScene extends Phaser.Scene {
     });
   }
 
+  recycleShot(colorIndex) {
+    if (this.shot) {
+      this.shot.destroy();
+      this.shot = null;
+    }
+    this.loaded = this.createBubbleVisual(SHOOTER_X, SHOOTER_Y, colorIndex);
+    this.loaded.setDepth(9);
+    this.phase = 'ready';
+  }
+
   attachShot(hit) {
     if (!this.shot) {
       return;
@@ -657,32 +696,33 @@ export default class BubbleShooterScene extends Phaser.Scene {
     const y = this.shot.y;
     const colorIndex = this.shot.getData('colorIndex');
     const mag = Math.hypot(this.shotVx, this.shotVy) || 1;
-    const snapX = x - (this.shotVx / mag) * 10;
-    const snapY = y - (this.shotVy / mag) * 10;
+    const snapX = x - (this.shotVx / mag) * 12;
+    const snapY = y - (this.shotVy / mag) * 12;
     this.shot.destroy();
     this.shot = null;
     this.phase = 'resolve';
 
-    const cell = this.pickSnapCell(snapX, snapY, hit);
+    const cell = this.pickSnapCell(snapX, snapY, hit) || this.pickSnapCell(x, y, hit);
     if (!cell) {
-      this.endGame();
+      this.recycleShot(colorIndex);
       return;
     }
 
     const placed = this.placeBubble(cell.row, cell.col, colorIndex);
     this.audio.stick();
 
+    const group = this.sameColorGroup(cell.row, cell.col);
+    if (group.length >= MATCH_MIN) {
+      this.popAndDrop(group);
+      return;
+    }
+
     if (placed.visual.y + R >= DANGER_Y) {
       this.endGame();
       return;
     }
 
-    const group = this.sameColorGroup(cell.row, cell.col);
-    if (group.length >= MATCH_MIN) {
-      this.popAndDrop(group);
-    } else {
-      this.afterNoMatch();
-    }
+    this.afterNoMatch();
   }
 
   popAndDrop(group) {
@@ -706,6 +746,9 @@ export default class BubbleShooterScene extends Phaser.Scene {
 
     this.refreshHud();
     this.time.delayedCall(220 + group.length * 16, () => {
+      if (this.ended) {
+        return;
+      }
       const connected = this.ceilingConnected();
       const falling = [];
       this.bubbles.forEach((bubble, key) => {
@@ -782,7 +825,12 @@ export default class BubbleShooterScene extends Phaser.Scene {
     this.stagger = 1 - this.stagger;
 
     const moveCount = this.bubbles.size;
+    let finished = false;
     const finish = () => {
+      if (finished || this.ended) {
+        return;
+      }
+      finished = true;
       this.spawnFilledRow(0, true);
       this.shotsUntilDrop = this.shotsForLevel();
       this.audio.row();
@@ -795,22 +843,16 @@ export default class BubbleShooterScene extends Phaser.Scene {
       return;
     }
 
-    let remaining = moveCount;
     this.bubbles.forEach((bubble) => {
       const point = this.cellCenter(bubble.row, bubble.col);
       this.tweens.add({
         targets: bubble.visual,
         x: point.x,
         y: point.y,
-        duration: 220,
-        onComplete: () => {
-          remaining -= 1;
-          if (remaining <= 0) {
-            finish();
-          }
-        },
+        duration: 180,
       });
     });
+    this.time.delayedCall(200, finish);
   }
 
   finishTurn() {
@@ -841,7 +883,7 @@ export default class BubbleShooterScene extends Phaser.Scene {
     const minX = WALL + R;
     const maxX = GAME_WIDTH - WALL - R;
 
-    for (let i = 0; i < 32; i += 1) {
+    for (let i = 0; i < 48; i += 1) {
       x += vx * 12;
       y += vy * 12;
       if (x <= minX) {
@@ -851,7 +893,7 @@ export default class BubbleShooterScene extends Phaser.Scene {
         x = maxX;
         vx *= -1;
       }
-      if (y < ORIGIN_Y - R) {
+      if (y - R <= CEILING_Y) {
         break;
       }
       if (this.clusterHitAt(x, y)) {
@@ -886,6 +928,25 @@ export default class BubbleShooterScene extends Phaser.Scene {
       return;
     }
 
+    const dist = SHOT_SPEED * dt;
+    const steps = Math.max(1, Math.ceil(dist / SHOT_STEP));
+    const stepDt = dt / steps;
+    for (let i = 0; i < steps; i += 1) {
+      if (this.phase !== 'flying' || !this.shot) {
+        return;
+      }
+      this.advanceShot(stepDt);
+    }
+  }
+
+  bounceWallSound() {
+    if (this.time.now >= this.nextWallSoundAt) {
+      this.nextWallSoundAt = this.time.now + 80;
+      this.audio.bounce();
+    }
+  }
+
+  advanceShot(dt) {
     this.shot.x += this.shotVx * dt;
     this.shot.y += this.shotVy * dt;
 
@@ -893,22 +954,22 @@ export default class BubbleShooterScene extends Phaser.Scene {
     const maxX = GAME_WIDTH - WALL - R;
     if (this.shot.x < minX) {
       this.shot.x = minX;
-      this.shotVx *= -1;
-      if (this.time.now >= this.nextWallSoundAt) {
-        this.nextWallSoundAt = this.time.now + 80;
-        this.audio.bounce();
-      }
+      this.shotVx = Math.abs(this.shotVx);
+      this.bounceWallSound();
     } else if (this.shot.x > maxX) {
       this.shot.x = maxX;
-      this.shotVx *= -1;
-      if (this.time.now >= this.nextWallSoundAt) {
-        this.nextWallSoundAt = this.time.now + 80;
-        this.audio.bounce();
-      }
+      this.shotVx = -Math.abs(this.shotVx);
+      this.bounceWallSound();
     }
 
-    if (this.shot.y - R <= ORIGIN_Y - R + 2) {
+    if (this.shot.y - R <= CEILING_Y + 1) {
+      this.shot.y = CEILING_Y + R + 1;
       this.attachShot(null);
+      return;
+    }
+
+    if (this.shot.y > GAME_HEIGHT + R) {
+      this.recycleShot(this.shot.getData('colorIndex'));
       return;
     }
 
