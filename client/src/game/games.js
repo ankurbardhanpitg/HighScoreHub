@@ -74,6 +74,21 @@ export const GAMES = [
       { emoji: '🧱', title: 'Clear the wall', text: 'Break every brick to go up a level. Combos and bank shots score extra. Don’t let the ball fall!', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'starwaves',
+    name: 'Star Waves',
+    shortName: 'Star Waves',
+    path: '/game/starwaves',
+    howToPath: '/howto/starwaves',
+    emoji: '🚀',
+    cardClass: 'card-starwaves',
+    blurb: 'Move your ship, blast the star blobs, and clear each wave before they reach you.',
+    steps: [
+      { emoji: '🚀', title: 'Steer your ship', text: 'Slide a finger, move the mouse, or use the arrow keys along the bottom.', cardClass: 'card-tap' },
+      { emoji: '⭐', title: 'Blast the blobs', text: 'Tap the game or press Space to shoot. Back-row blobs are worth extra points.', cardClass: 'card-starwaves' },
+      { emoji: '🌊', title: 'Clear the wave', text: 'Zap every blob to start a faster wave. Dodge their sparkles — you have 3 lives!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';
