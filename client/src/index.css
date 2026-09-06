@@ -916,6 +916,10 @@ main {
   background: #e8dcff;
 }
 
+.card-bubble span {
+  background: #ffe1ea;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -1094,6 +1098,18 @@ main {
 .starwaves-stage {
   background: linear-gradient(180deg, #fff, #ece4ff);
   box-shadow: var(--shadow), 0 10px 0 #6d45c8;
+}
+
+.bubble-canvas {
+  height: 560px;
+  background: #3b2d6b;
+  touch-action: none;
+  user-select: none;
+}
+
+.bubble-stage {
+  background: linear-gradient(180deg, #fff, #f3e4ff);
+  box-shadow: var(--shadow), 0 10px 0 #9b6dff;
 }
 
 .game-fabs {
@@ -1395,6 +1411,10 @@ main {
     transform-origin: top center;
     margin-bottom: -46px;
   }
+
+  .bubble-game-page {
+    margin-bottom: -70px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1403,6 +1423,10 @@ main {
     transform-origin: top center;
     margin-bottom: -106px;
   }
+
+  .bubble-game-page {
+    margin-bottom: -162px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1410,6 +1434,10 @@ main {
     transform: scale(0.52);
     transform-origin: top center;
     margin-bottom: -182px;
+  }
+
+  .bubble-game-page {
+    margin-bottom: -278px;
   }
 }
 

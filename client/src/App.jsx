@@ -10,6 +10,7 @@ import GameWhack from './pages/GameWhack.jsx';
 import GamePong from './pages/GamePong.jsx';
 import GameBreakout from './pages/GameBreakout.jsx';
 import GameStarWaves from './pages/GameStarWaves.jsx';
+import GameBubbleShooter from './pages/GameBubbleShooter.jsx';
 import HowTo from './pages/HowTo.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import SignIn from './pages/SignIn.jsx';
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/game/pong" element={<GamePong />} />
           <Route path="/game/breakout" element={<GameBreakout />} />
           <Route path="/game/starwaves" element={<GameStarWaves />} />
+          <Route path="/game/bubble" element={<GameBubbleShooter />} />
           <Route
             path="/leaderboard"
             element={

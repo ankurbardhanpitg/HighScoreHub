@@ -3,7 +3,7 @@ import Score from '../models/Score.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
-const GAMES = ['flappy', '2048', 'whack', 'pong', 'breakout', 'starwaves'];
+const GAMES = ['flappy', '2048', 'whack', 'pong', 'breakout', 'starwaves', 'bubble'];
 
 function parseScore(value) {
   if (typeof value === 'number') {

@@ -89,6 +89,21 @@ export const GAMES = [
       { emoji: '🌊', title: 'Clear the wave', text: 'Zap every blob to start a faster wave. Dodge their sparkles — you have 3 lives!', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'bubble',
+    name: 'Bubble Shooter',
+    shortName: 'Bubble',
+    path: '/game/bubble',
+    howToPath: '/howto/bubble',
+    emoji: '🫧',
+    cardClass: 'card-bubble',
+    blurb: 'Aim the cannon, match 2 or more bubbles of the same color, and clear the cluster before it drops.',
+    steps: [
+      { emoji: '🎯', title: 'Aim and shoot', text: 'Move the mouse or a finger, or use the arrow keys. Tap or press Space to send a bubble.', cardClass: 'card-tap' },
+      { emoji: '🫧', title: 'Match two', text: 'Hit a group of the same color. Two or more pop, and leftover bubbles can fall.', cardClass: 'card-bubble' },
+      { emoji: '⬇️', title: 'Watch the drop', text: 'After a few shots, a new row slides in. Don’t let bubbles cross the pink line!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';
