@@ -134,6 +134,21 @@ export const GAMES = [
       { emoji: '⭐', title: 'First to 5', text: 'Each round you win is a point. Reach 5 before the computer does!', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'connectfour',
+    name: 'Connect Four',
+    shortName: 'Connect Four',
+    path: '/game/connectfour',
+    howToPath: '/howto/connectfour',
+    emoji: '🟡',
+    cardClass: 'card-connectfour',
+    blurb: 'Drop discs into a column and get four in a row before the computer. First to 5 wins the match.',
+    steps: [
+      { emoji: '👆', title: 'Tap a column', text: 'Discs fall to the lowest open slot. Numbers 1 to 7 work too.', cardClass: 'card-tap' },
+      { emoji: '🟡', title: 'Make four in a row', text: 'Line up four pink discs across, down, or diagonally. Block the computer’s yellow discs too!', cardClass: 'card-connectfour' },
+      { emoji: '⭐', title: 'First to 5', text: 'Each round you win is a point. Reach 5 before the computer does!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';
