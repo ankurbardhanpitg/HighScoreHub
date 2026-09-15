@@ -149,6 +149,21 @@ export const GAMES = [
       { emoji: '⭐', title: 'First to 5', text: 'Each round you win is a point. Reach 5 before the computer does!', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'simon',
+    name: 'Simon Says',
+    shortName: 'Simon',
+    path: '/game/simon',
+    howToPath: '/howto/simon',
+    emoji: '🎵',
+    cardClass: 'card-simon',
+    blurb: 'Watch the colored lights, tap them back in order, and see how long a sequence you can remember.',
+    steps: [
+      { emoji: '👀', title: 'Watch the lights', text: 'Simon lights up a color and plays a tone. Remember the order.', cardClass: 'card-tap' },
+      { emoji: '👆', title: 'Repeat the sequence', text: 'Tap the same colors in the same order. Q W A S or 1 to 4 work too.', cardClass: 'card-simon' },
+      { emoji: '🧠', title: 'Go longer', text: 'Each round adds one more color and speeds up a little. One miss ends the game!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';

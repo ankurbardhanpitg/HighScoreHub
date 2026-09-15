@@ -932,6 +932,10 @@ main {
   background: #dcecff;
 }
 
+.card-simon span {
+  background: #e8dcff;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -2224,6 +2228,128 @@ main {
   box-shadow: 0 3px 0 #1a2436, inset 0 0 0 3px #ffe566;
 }
 
+.simon-page {
+  width: min(460px, 100%);
+}
+
+.simon-stage {
+  background: linear-gradient(180deg, #fff, #e8dcff);
+  box-shadow: var(--shadow), 0 10px 0 #6b45c9;
+}
+
+.simon-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 14px;
+  aspect-ratio: 1;
+  padding: 18px;
+  border-radius: 50%;
+  background: #243047;
+  box-shadow: inset 0 0 0 8px #1a2436, 0 8px 0 #1a2436;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.simon-pad {
+  border: 0;
+  cursor: pointer;
+  transition: filter 80ms ease, transform 80ms ease, box-shadow 80ms ease;
+}
+
+.simon-pad:focus-visible {
+  outline: 3px solid #ffe566;
+  outline-offset: 3px;
+}
+
+.simon-pad:disabled,
+.simon-pad.is-locked {
+  cursor: default;
+}
+
+.simon-pad-green {
+  border-radius: 100% 18px 18px 18px;
+  background: #1f8a4c;
+  box-shadow: 0 6px 0 #146338, inset 0 3px 0 rgba(255, 255, 255, 0.18);
+}
+
+.simon-pad-red {
+  border-radius: 18px 100% 18px 18px;
+  background: #e23d3d;
+  box-shadow: 0 6px 0 #b42323, inset 0 3px 0 rgba(255, 255, 255, 0.18);
+}
+
+.simon-pad-yellow {
+  border-radius: 18px 18px 18px 100%;
+  background: #f5c518;
+  box-shadow: 0 6px 0 #c9a00e, inset 0 3px 0 rgba(255, 255, 255, 0.28);
+}
+
+.simon-pad-blue {
+  border-radius: 18px 18px 100% 18px;
+  background: #4da3ff;
+  box-shadow: 0 6px 0 #2776d4, inset 0 3px 0 rgba(255, 255, 255, 0.22);
+}
+
+.simon-pad:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.simon-pad.is-lit {
+  filter: brightness(1.45) saturate(1.15);
+  transform: scale(1.03);
+  box-shadow: 0 2px 0 rgba(26, 36, 54, 0.4), 0 0 22px rgba(255, 255, 255, 0.45);
+}
+
+.simon-pad.is-miss {
+  filter: brightness(1.2);
+  animation: simon-miss 420ms ease-out;
+}
+
+.simon-hub {
+  position: absolute;
+  inset: 31%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  border-radius: 50%;
+  background: #243047;
+  box-shadow: inset 0 0 0 6px #1a2436, 0 4px 0 #1a2436;
+  color: #fffdf8;
+  pointer-events: none;
+  text-align: center;
+}
+
+.simon-hub strong {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 6vw, 2.1rem);
+  line-height: 1;
+}
+
+.simon-hub span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #d7ecff;
+}
+
+@keyframes simon-miss {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.94);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+}
+
 @keyframes c4-drop {
   0% {
     transform: translateY(-140%) scale(0.92);
@@ -2290,7 +2416,14 @@ main {
   .c4-disc.is-player,
   .c4-disc.is-cpu,
   .c4-slot.is-last .c4-disc,
-  .c4-slot.is-win .c4-disc {
+  .c4-slot.is-win .c4-disc,
+  .simon-pad.is-miss {
     animation: none;
+  }
+
+  .simon-pad,
+  .simon-pad.is-lit {
+    transition: none;
+    transform: none;
   }
 }
