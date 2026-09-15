@@ -924,6 +924,10 @@ main {
   background: #d8f5d3;
 }
 
+.card-tictactoe span {
+  background: #ffe4c4;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -2015,6 +2019,128 @@ main {
   }
 }
 
+.ttt-page {
+  width: min(460px, 100%);
+}
+
+.ttt-turn {
+  margin: 0 0 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.92);
+  border: 3px solid #fff;
+  box-shadow: var(--shadow);
+  font-weight: 800;
+  text-align: center;
+}
+
+.ttt-stage {
+  background: linear-gradient(180deg, #fff, #ffe8d4);
+  box-shadow: var(--shadow), 0 10px 0 #d48a2a;
+}
+
+.ttt-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 12px;
+  aspect-ratio: 1;
+  padding: 14px;
+  border-radius: 24px;
+  background: #243047;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.ttt-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 18px;
+  background: #fffdf8;
+  box-shadow: 0 4px 0 #1a2436;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.ttt-cell:hover:not(:disabled) {
+  background: #fff3c4;
+}
+
+.ttt-cell:focus-visible {
+  outline: 3px solid #ffe566;
+  outline-offset: 2px;
+}
+
+.ttt-cell:disabled {
+  cursor: default;
+}
+
+.ttt-cell.is-x {
+  background: #ffe1ea;
+}
+
+.ttt-cell.is-o {
+  background: #dcecff;
+}
+
+.ttt-cell.is-win {
+  animation: ttt-win 520ms ease-out;
+}
+
+.ttt-cell.is-x.is-win {
+  background: #ffb3d0;
+}
+
+.ttt-cell.is-o.is-win {
+  background: #9fd4ff;
+}
+
+.ttt-cell.is-last:not(.is-win) {
+  box-shadow: 0 4px 0 #1a2436, inset 0 0 0 3px #ffe566;
+}
+
+.ttt-mark {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 12vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1;
+  animation: ttt-pop 180ms ease-out;
+}
+
+.ttt-cell.is-x .ttt-mark {
+  color: var(--candy-pink);
+}
+
+.ttt-cell.is-o .ttt-mark {
+  color: var(--candy-blue);
+}
+
+@keyframes ttt-pop {
+  0% {
+    transform: scale(0.55);
+  }
+  80% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ttt-win {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sun,
   .cloud,
@@ -2035,7 +2161,13 @@ main {
   }
 
   .puzzle-tile,
-  .whack-mole {
+  .whack-mole,
+  .ttt-mark {
     transition: none;
+  }
+
+  .ttt-mark,
+  .ttt-cell.is-win {
+    animation: none;
   }
 }

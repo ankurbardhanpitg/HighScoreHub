@@ -119,6 +119,21 @@ export const GAMES = [
       { emoji: '🏁', title: 'Keep growing', text: 'Every 5 apples you speed up a level. Don’t bump the edge or your tail!', cardClass: 'card-score' },
     ],
   },
+  {
+    id: 'tictactoe',
+    name: 'Tic Tac Toe',
+    shortName: 'Tic Tac Toe',
+    path: '/game/tictactoe',
+    howToPath: '/howto/tictactoe',
+    emoji: '❌',
+    cardClass: 'card-tictactoe',
+    blurb: 'You are X. Get three in a row before the computer. First to 5 wins the match.',
+    steps: [
+      { emoji: '👆', title: 'Tap a square', text: 'Place your X in an empty square. Numbers 1 to 9 work too.', cardClass: 'card-tap' },
+      { emoji: '❌', title: 'Make three in a row', text: 'Line up three X’s across, down, or diagonally. Block the computer’s O’s too!', cardClass: 'card-tictactoe' },
+      { emoji: '⭐', title: 'First to 5', text: 'Each round you win is a point. Reach 5 before the computer does!', cardClass: 'card-score' },
+    ],
+  },
 ];
 
 export const DEFAULT_GAME = 'flappy';
