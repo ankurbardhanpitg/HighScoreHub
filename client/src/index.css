@@ -1003,6 +1003,26 @@ main {
   color: var(--ink);
   font-weight: 800;
   box-shadow: 0 4px 0 rgba(36, 80, 120, 0.12);
+  max-height: 64px;
+  overflow: hidden;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    margin 0.52s ease,
+    padding 0.52s ease,
+    max-height 0.52s ease,
+    border-width 0.52s ease;
+}
+
+.game-wrap.is-expanded .game-kicker {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
 }
 
 .game-switcher {
@@ -1044,10 +1064,28 @@ main {
 }
 
 .game-page {
+  --game-base-scale: 1;
+  --game-play-scale: 1;
   position: relative;
   width: 720px;
   max-width: 100%;
   margin: 0 auto;
+  transform: scale(calc(var(--game-base-scale) * var(--game-play-scale)));
+  transform-origin: top center;
+  transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1), margin-bottom 0.52s ease;
+}
+
+.game-page.is-expanded {
+  --game-play-scale: 1.28;
+  margin-bottom: 118px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page,
+  .puzzle-page,
+  .game-kicker {
+    transition: none;
+  }
 }
 
 .game-stage {
@@ -1422,9 +1460,12 @@ main {
 
 @media (max-width: 780px) {
   .game-page {
-    transform: scale(0.88);
-    transform-origin: top center;
+    --game-base-scale: 0.88;
     margin-bottom: -46px;
+  }
+
+  .game-page.is-expanded {
+    margin-bottom: 52px;
   }
 
   .bubble-game-page {
@@ -1434,9 +1475,12 @@ main {
 
 @media (max-width: 640px) {
   .game-page {
-    transform: scale(0.72);
-    transform-origin: top center;
+    --game-base-scale: 0.72;
     margin-bottom: -106px;
+  }
+
+  .game-page.is-expanded {
+    margin-bottom: -12px;
   }
 
   .bubble-game-page {
@@ -1446,9 +1490,12 @@ main {
 
 @media (max-width: 480px) {
   .game-page {
-    transform: scale(0.52);
-    transform-origin: top center;
+    --game-base-scale: 0.52;
     margin-bottom: -182px;
+  }
+
+  .game-page.is-expanded {
+    margin-bottom: -120px;
   }
 
   .bubble-game-page {
@@ -1457,10 +1504,20 @@ main {
 }
 
 .puzzle-page {
+  --game-base-scale: 1;
+  --game-play-scale: 1;
   position: relative;
   width: min(520px, 100%);
   margin: 0 auto;
   text-align: left;
+  transform: scale(calc(var(--game-base-scale) * var(--game-play-scale)));
+  transform-origin: top center;
+  transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1), margin-bottom 0.52s ease;
+}
+
+.puzzle-page.is-expanded {
+  --game-play-scale: 1.28;
+  margin-bottom: 160px;
 }
 
 .puzzle-hud {

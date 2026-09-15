@@ -110,7 +110,7 @@ export default class FlappyScene extends Phaser.Scene {
     this.audio = createFlappyAudio();
     this.applyLevelSettings();
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x7ed8f2);
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x4aa8c8);
 
     this.addCloud(90, 70, 0.9);
     this.addCloud(280, 120, 0.7);
@@ -148,7 +148,7 @@ export default class FlappyScene extends Phaser.Scene {
     ground.setDepth(3);
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 5, GAME_WIDTH, 10, 0xde9b4a).setDepth(3);
 
-    const ceiling = this.add.rectangle(GAME_WIDTH / 2, -4, GAME_WIDTH, 8, 0x7ed8f2, 0);
+    const ceiling = this.add.rectangle(GAME_WIDTH / 2, -4, GAME_WIDTH, 8, 0x4aa8c8, 0);
     this.physics.add.existing(ceiling, true);
 
     this.physics.add.collider(this.bird, this.pipes, this.endGame, undefined, this);

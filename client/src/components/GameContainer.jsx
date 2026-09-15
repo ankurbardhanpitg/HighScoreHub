@@ -38,7 +38,7 @@ const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateCha
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
       parent: containerRef.current,
-      backgroundColor: '#70c5ce',
+      backgroundColor: '#3d96b4',
       physics: {
         default: 'arcade',
         arcade: {

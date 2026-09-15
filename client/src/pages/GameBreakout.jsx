@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import BreakoutContainer from '../components/BreakoutContainer.jsx';
 import QuitGameButton, { GamePlayFabs } from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useGameExpand } from '../hooks/useGameExpand.js';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
 
@@ -39,6 +40,12 @@ export default function GameBreakout() {
     setGameKey((value) => value + 1);
   }
 
+  const { isExpanded, handleQuit } = useGameExpand({
+    playState,
+    isGameOver,
+    onPause: () => gameRef.current?.pause(),
+  });
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -69,9 +76,9 @@ export default function GameBreakout() {
           : '';
 
   return (
-    <section className="game-wrap">
+    <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
-      <div className="game-page">
+      <div className={`game-page${isExpanded ? ' is-expanded' : ''}`}>
         <div className="game-stage breakout-stage">
           <BreakoutContainer
             key={gameKey}
@@ -80,7 +87,9 @@ export default function GameBreakout() {
             onStateChange={setPlayState}
           />
 
-          {playState === 'playing' && <GamePlayFabs onPause={() => gameRef.current?.pause()} />}
+          {playState === 'playing' && (
+            <GamePlayFabs onPause={() => gameRef.current?.pause()} onQuit={handleQuit} />
+          )}
 
           {playState === 'waiting' && (
             <div className="overlay" onClick={() => gameRef.current?.start()}>
@@ -97,7 +106,7 @@ export default function GameBreakout() {
                   <Link className="button button-secondary" to="/howto/breakout" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -112,7 +121,7 @@ export default function GameBreakout() {
                   <button className="button button-play" type="button" onClick={() => gameRef.current?.resume()}>
                     Resume
                   </button>
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -161,7 +170,7 @@ export default function GameBreakout() {
                       High scores
                     </Link>
                   ) : null}
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>

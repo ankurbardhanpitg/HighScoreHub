@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import StarWavesContainer from '../components/StarWavesContainer.jsx';
 import QuitGameButton, { GamePlayFabs } from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useGameExpand } from '../hooks/useGameExpand.js';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
 
@@ -39,6 +40,12 @@ export default function GameStarWaves() {
     setGameKey((value) => value + 1);
   }
 
+  const { isExpanded, handleQuit } = useGameExpand({
+    playState,
+    isGameOver,
+    onPause: () => gameRef.current?.pause(),
+  });
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -69,9 +76,9 @@ export default function GameStarWaves() {
           : '';
 
   return (
-    <section className="game-wrap">
+    <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
-      <div className="game-page">
+      <div className={`game-page${isExpanded ? ' is-expanded' : ''}`}>
         <div className="game-stage starwaves-stage">
           <StarWavesContainer
             key={gameKey}
@@ -80,7 +87,9 @@ export default function GameStarWaves() {
             onStateChange={setPlayState}
           />
 
-          {playState === 'playing' && <GamePlayFabs onPause={() => gameRef.current?.pause()} />}
+          {playState === 'playing' && (
+            <GamePlayFabs onPause={() => gameRef.current?.pause()} onQuit={handleQuit} />
+          )}
 
           {playState === 'waiting' && (
             <div className="overlay" onClick={() => gameRef.current?.start()}>
@@ -97,7 +106,7 @@ export default function GameStarWaves() {
                   <Link className="button button-secondary" to="/howto/starwaves" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -112,7 +121,7 @@ export default function GameStarWaves() {
                   <button className="button button-play" type="button" onClick={() => gameRef.current?.resume()}>
                     Resume
                   </button>
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -159,7 +168,7 @@ export default function GameStarWaves() {
                       High scores
                     </Link>
                   ) : null}
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>

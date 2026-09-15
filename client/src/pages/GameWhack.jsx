@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import WhackBoard from '../components/WhackBoard.jsx';
 import QuitGameButton from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useGameExpand } from '../hooks/useGameExpand.js';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
 
@@ -189,6 +190,15 @@ export default function GameWhack() {
     spawnMole();
   }, [clearTimers, endGame, spawnMole]);
 
+  const { isExpanded, handleQuit } = useGameExpand({
+    playState,
+    onPause: () => {
+      if (playStateRef.current === 'playing') {
+        clearTimers();
+      }
+    },
+  });
+
   const handleWhack = useCallback(
     (index) => {
       if (playStateRef.current !== 'playing') {
@@ -283,10 +293,10 @@ export default function GameWhack() {
         : '';
 
   return (
-    <section className="game-wrap">
+    <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
 
-      <div className="puzzle-page whack-page">
+      <div className={`puzzle-page whack-page${isExpanded ? ' is-expanded' : ''}`}>
         <div className="puzzle-hud">
           <div className="puzzle-scores">
             <div className="puzzle-score">
@@ -308,7 +318,7 @@ export default function GameWhack() {
                 Restart
               </button>
             ) : null}
-            <QuitGameButton className="button button-secondary puzzle-new" />
+            <QuitGameButton className="button button-secondary puzzle-new" onClick={handleQuit} />
           </div>
         </div>
 
@@ -336,7 +346,7 @@ export default function GameWhack() {
                   <Link className="button button-secondary" to="/howto/whack" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -384,7 +394,7 @@ export default function GameWhack() {
                       High scores
                     </Link>
                   ) : null}
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>

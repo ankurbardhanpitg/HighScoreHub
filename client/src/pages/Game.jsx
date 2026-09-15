@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import GameContainer from '../components/GameContainer.jsx';
 import QuitGameButton, { GamePlayFabs } from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useGameExpand } from '../hooks/useGameExpand.js';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
 
@@ -29,6 +30,12 @@ export default function Game() {
     setSubmitError('');
     setSavedAt('');
   }, []);
+
+  const { isExpanded, handleQuit } = useGameExpand({
+    playState,
+    isGameOver,
+    onPause: () => gameRef.current?.pause(),
+  });
 
   function playAgain() {
     setIsGameOver(false);
@@ -72,9 +79,9 @@ export default function Game() {
           : '';
 
   return (
-    <section className="game-wrap">
+    <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
-      <div className="game-page">
+      <div className={`game-page${isExpanded ? ' is-expanded' : ''}`}>
         <div className="game-stage">
           <GameContainer
             key={gameKey}
@@ -83,7 +90,9 @@ export default function Game() {
             onStateChange={setPlayState}
           />
 
-          {playState === 'playing' && <GamePlayFabs onPause={() => gameRef.current?.pause()} />}
+          {playState === 'playing' && (
+            <GamePlayFabs onPause={() => gameRef.current?.pause()} onQuit={handleQuit} />
+          )}
 
           {playState === 'waiting' && (
             <div className="overlay" onClick={() => gameRef.current?.start()}>
@@ -97,7 +106,7 @@ export default function Game() {
                   <Link className="button button-secondary" to="/howto/flappy" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -112,7 +121,7 @@ export default function Game() {
                   <button className="button button-play" type="button" onClick={() => gameRef.current?.resume()}>
                     Resume
                   </button>
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -163,7 +172,7 @@ export default function Game() {
                       High scores
                     </Link>
                   ) : null}
-                  <QuitGameButton />
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
