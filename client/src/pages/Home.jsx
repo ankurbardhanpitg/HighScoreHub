@@ -13,7 +13,7 @@ export default function Home() {
             Welcome to <span className="highlight">HighScoreHub</span>
           </h1>
           <p className="lede">
-            Play fun games, save your scores, and climb the leaderboard. Flappy Bird, 2048, Whack-a-Mole, Pong, Breakout, Star Waves, Bubble Shooter, Snake, Tic Tac Toe, Connect Four, and Simon Says are ready to play.
+            Play fun games, save your scores, and climb the leaderboard. Flappy Bird, Dino Runner, 2048, Whack-a-Mole, Pong, Breakout, Star Waves, Bubble Shooter, Snake, Tic Tac Toe, Connect Four, and Simon Says are ready to play.
           </p>
           {user ? (
             <p className="welcome-pill">Hi {user.username}! Ready to beat your high score?</p>

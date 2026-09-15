@@ -15,6 +15,21 @@ export const GAMES = [
     ],
   },
   {
+    id: 'dino',
+    name: 'Dino Runner',
+    shortName: 'Dino',
+    path: '/game/dino',
+    howToPath: '/howto/dino',
+    emoji: '🦖',
+    cardClass: 'card-dino',
+    blurb: 'Tap or press Space to jump. Clear 20 obstacles to go up a level, then beat all 5 levels to win.',
+    steps: [
+      { emoji: '👆', title: 'Tap or Space', text: 'Give the dino a jump whenever you need to hop or flap higher.', cardClass: 'card-tap' },
+      { emoji: '🌵', title: 'Dodge obstacles', text: 'Leap over cacti and flap past pterodactyls. The ground is safe — bumps are not!', cardClass: 'card-dino' },
+      { emoji: '🏁', title: 'Beat 5 levels', text: 'Each obstacle is a point. Pass 20 to level up — later levels are faster. Clear all 5 to win!', cardClass: 'card-score' },
+    ],
+  },
+  {
     id: '2048',
     name: '2048',
     shortName: '2048',

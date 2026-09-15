@@ -936,6 +936,10 @@ main {
   background: #e8dcff;
 }
 
+.card-dino span {
+  background: #ffe4c4;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -1175,6 +1179,17 @@ main {
 .snake-stage {
   background: linear-gradient(180deg, #fff, #e4f8e8);
   box-shadow: var(--shadow), 0 10px 0 #3d9a2a;
+}
+
+.dino-canvas {
+  background: #070b1c;
+  touch-action: none;
+  user-select: none;
+}
+
+.dino-stage {
+  background: linear-gradient(180deg, #1a1448, #0b1026);
+  box-shadow: var(--shadow), 0 10px 0 #3d2a9e;
 }
 
 .game-fabs {
