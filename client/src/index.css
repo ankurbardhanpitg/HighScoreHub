@@ -1183,14 +1183,14 @@ main {
 }
 
 .snake-canvas {
-  background: #1d4d3a;
+  background: #10261c;
   touch-action: none;
   user-select: none;
 }
 
 .snake-stage {
-  background: linear-gradient(180deg, #fff, #e4f8e8);
-  box-shadow: var(--shadow), 0 10px 0 #3d9a2a;
+  background: linear-gradient(165deg, #f7ffe9 0%, #e3f6c6 52%, #c8e6a0 100%);
+  box-shadow: var(--shadow), 0 10px 0 #2f8a3e;
 }
 
 .dino-canvas {

@@ -38,7 +38,7 @@ const SnakeContainer = forwardRef(function SnakeContainer({ onGameOver, onStateC
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
       parent: containerRef.current,
-      backgroundColor: '#1d4d3a',
+      backgroundColor: '#10261c',
       physics: {
         default: 'arcade',
         arcade: {
