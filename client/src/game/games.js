@@ -203,11 +203,11 @@ export const GAMES = [
     howToPath: '/howto/towerdefense',
     emoji: '🏰',
     cardClass: 'card-towerdefense',
-    blurb: 'Place towers along the path, stop the blobs, and clear all 10 waves before they reach the castle. Later waves hit harder and faster.',
+    blurb: 'Place towers along the path, stop the blobs, and clear all 30 waves before they reach the castle. Later waves hit harder and faster.',
     steps: [
       { emoji: '👆', title: 'Pick, then place', text: 'Tap a tower on the right — Dart, Frost, or Boom. Then tap a grass square beside the path. Keys 1, 2, and 3 work too.', cardClass: 'card-tap' },
       { emoji: '🏰', title: 'Guard the path', text: 'Blobs walk the sandy trail. Dart hits one, Frost slows them, Boom splashes a group. Spend gold from each KO to build more.', cardClass: 'card-towerdefense' },
-      { emoji: '🏁', title: 'Beat 10 waves', text: 'You have 8 lives. A blob that reaches the pink castle costs a life — bosses cost 2. Clear every wave to win, and chase a huge score!', cardClass: 'card-score' },
+      { emoji: '🏁', title: 'Beat 30 waves', text: 'You have 8 lives. A blob that reaches the pink castle costs a life — bosses cost 2. Clear every wave to win, and chase a huge score!', cardClass: 'card-score' },
     ],
   },
   {

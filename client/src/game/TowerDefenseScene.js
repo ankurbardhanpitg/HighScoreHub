@@ -4,7 +4,7 @@ export const GAME_WIDTH = 720;
 export const GAME_HEIGHT = 380;
 export const STARTING_LIVES = 8;
 export const STARTING_GOLD = 110;
-export const TOTAL_WAVES = 10;
+export const TOTAL_WAVES = 30;
 
 const TILE = 28;
 const MAP_COLS = 18;
@@ -214,16 +214,30 @@ function enemiesForWave(wave) {
   if (wave === 7) {
     return Array.from({ length: 16 }, () => 'bee');
   }
+  if (wave === 14 || wave === 21 || wave === 28) {
+    return Array.from({ length: 16 + (wave / 7 - 1) * 6 }, () => 'bee');
+  }
 
   const counts = {
-    slime: 6 + wave,
-    bee: wave >= 2 ? 1 + wave : 0,
-    rock: wave >= 4 ? wave - 1 : 0,
+    slime: Math.min(24, 6 + wave),
+    bee: wave >= 2 ? Math.min(20, 1 + wave) : 0,
+    rock: wave >= 4 ? Math.min(16, wave - 1) : 0,
     boss: wave === 5 || wave === 8 ? 1 : 0,
   };
+
   if (wave === 10) {
     counts.boss = 2;
     counts.rock += 2;
+  } else if (wave === 15) {
+    counts.boss = 1;
+    counts.rock += 2;
+  } else if (wave === 20 || wave === 25) {
+    counts.boss = 2;
+    counts.rock += 2;
+  } else if (wave === 30) {
+    counts.boss = 3;
+    counts.rock += 4;
+    counts.slime += 4;
   }
 
   const list = [];
@@ -429,7 +443,7 @@ export default class TowerDefenseScene extends Phaser.Scene {
       strokeThickness: 5,
     }).setOrigin(0, 0.5).setDepth(12);
 
-    this.waveText = this.add.text(GAME_WIDTH / 2 - 80, HUD_Y, 'Wave 1 / 10', {
+    this.waveText = this.add.text(GAME_WIDTH / 2 - 80, HUD_Y, `Wave 1 / ${TOTAL_WAVES}`, {
       fontFamily: 'Arial, sans-serif',
       fontSize: '16px',
       color: '#ffe566',
@@ -695,8 +709,9 @@ export default class TowerDefenseScene extends Phaser.Scene {
 
   spawnEnemy(kind) {
     const def = ENEMY_TYPES[kind];
-    const hpScale = 1 + (this.wave - 1) * 0.18;
-    const speedScale = 1 + (this.wave - 1) * 0.03;
+    const lateWaves = Math.max(0, this.wave - 10);
+    const hpScale = 1 + Math.min(this.wave - 1, 9) * 0.18 + lateWaves * 0.08;
+    const speedScale = 1 + Math.min(this.wave - 1, 9) * 0.03 + lateWaves * 0.015;
     const hp = Math.round(def.hp * hpScale);
     const start = this.waypoints[0];
     const parts = this.makeEnemyParts(def);
@@ -1012,10 +1027,11 @@ export default class TowerDefenseScene extends Phaser.Scene {
       if (this.spawnIn <= 0 && this.spawnQueue.length) {
         this.spawnEnemy(this.spawnQueue.shift());
         this.spawnPack += 1;
-        if (this.wave >= 8 && this.spawnPack % 4 === 0 && this.spawnQueue.length) {
+        const packEvery = this.wave >= 22 ? 2 : this.wave >= 14 ? 3 : this.wave >= 8 ? 4 : 0;
+        if (packEvery && this.spawnPack % packEvery === 0 && this.spawnQueue.length) {
           this.spawnEnemy(this.spawnQueue.shift());
         }
-        this.spawnIn = Math.max(220, 700 - this.wave * 38);
+        this.spawnIn = Math.max(180, 700 - this.wave * 38);
       }
     }
 

@@ -17,7 +17,7 @@ Games on the hub:
 - Tic Tac Toe (you vs the computer, three in a row, first to 5)
 - Connect Four (you vs the computer, four in a row, first to 5)
 - Chess (vs the computer, or make a room and share the link so a friend can join)
-- Tower Defense (place towers on the grass, stop the blobs, beat 10 waves)
+- Tower Defense (place towers on the grass, stop the blobs, beat 30 waves)
 - Simon Says (watch the lights, repeat the sequence, one miss ends the game)
 
 ## Project structure

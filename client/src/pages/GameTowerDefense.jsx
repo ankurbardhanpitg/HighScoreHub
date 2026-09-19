@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import TowerDefenseContainer from '../components/TowerDefenseContainer.jsx';
+import { TOTAL_WAVES } from '../game/TowerDefenseScene.js';
 import QuitGameButton, { GamePlayFabs } from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useGameExpand } from '../hooks/useGameExpand.js';
@@ -100,7 +101,7 @@ export default function GameTowerDefense() {
                 <h2>Ready?</h2>
                 <p>
                   Blobs march along the sandy path. Pick a tower, tap the grass to build, and stop them before they
-                  reach the pink castle. You have 8 lives — clear all 10 waves to win!
+                  reach the pink castle. You have 8 lives — clear all {TOTAL_WAVES} waves to win!
                 </p>
                 <div className="actions">
                   <button className="button button-play" type="button">
@@ -137,7 +138,7 @@ export default function GameTowerDefense() {
                 <p className="final-score">You scored {score}!</p>
                 <p>
                   {won
-                    ? 'You held the path through all 10 waves. Super defending!'
+                    ? `You held the path through all ${TOTAL_WAVES} waves. Super defending!`
                     : `You reached wave ${wave}. Want to try a tighter tower layout?`}
                 </p>
 
