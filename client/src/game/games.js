@@ -187,11 +187,12 @@ export const GAMES = [
     howToPath: '/howto/chess',
     emoji: '♟️',
     cardClass: 'card-chess',
-    blurb: 'You are White. Move your pieces, protect your king, and checkmate the computer. First to 3 wins the match.',
+    blurb: 'Play the computer, or make a room and share the link so a friend can join. Checkmate the king. First to 3 beats the computer.',
     steps: [
-      { emoji: '👆', title: 'Tap, then move', text: 'Tap one of your white pieces. Dots show where it can go. Tap a dotted square to move — or tap a circled piece to capture it.', cardClass: 'card-tap' },
+      { emoji: '👆', title: 'Tap, then move', text: 'Tap one of your pieces. Dots show where it can go. Tap a dotted square to move — or tap a circled piece to capture it.', cardClass: 'card-tap' },
       { emoji: '♟️', title: 'How pieces move', text: 'Pawns step forward and capture diagonally. Knights jump. Bishops go diagonal, rooks go straight, and the queen does both. The king moves one square. The king can also hop two squares to castle.', cardClass: 'card-chess' },
-      { emoji: '♔', title: 'Checkmate to win', text: 'If the computer attacks your king, that’s check — you must get out of it. Trap their king so it cannot escape to win the round. First to 3 wins the match!', cardClass: 'card-score' },
+      { emoji: '♔', title: 'Checkmate to win', text: 'If someone attacks your king, that’s check — you must get out of it. Trap their king so it cannot escape to win. Vs the computer, first to 3 wins the match!', cardClass: 'card-score' },
+      { emoji: '🔗', title: 'Play a friend', text: 'Tap Play a friend to make a room, then copy the link or code. Your friend opens it and you play live — you are White, they are Black.', cardClass: 'card-chess' },
     ],
   },
   {

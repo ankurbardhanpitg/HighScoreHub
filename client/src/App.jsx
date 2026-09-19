@@ -15,6 +15,7 @@ import GameSnake from './pages/GameSnake.jsx';
 import GameTicTacToe from './pages/GameTicTacToe.jsx';
 import GameConnectFour from './pages/GameConnectFour.jsx';
 import GameChess from './pages/GameChess.jsx';
+import GameChessRoom from './pages/GameChessRoom.jsx';
 import GameTowerDefense from './pages/GameTowerDefense.jsx';
 import GameSimon from './pages/GameSimon.jsx';
 import GameDino from './pages/GameDino.jsx';
@@ -82,6 +83,7 @@ export default function App() {
           <Route path="/game/tictactoe" element={<GameTicTacToe />} />
           <Route path="/game/connectfour" element={<GameConnectFour />} />
           <Route path="/game/chess" element={<GameChess />} />
+          <Route path="/game/chess/room/:roomId" element={<GameChessRoom />} />
           <Route path="/game/towerdefense" element={<GameTowerDefense />} />
           <Route path="/game/simon" element={<GameSimon />} />
           <Route path="/game/dino" element={<GameDino />} />

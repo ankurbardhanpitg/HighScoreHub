@@ -2518,6 +2518,80 @@ main {
   text-decoration: underline;
 }
 
+.chess-share,
+.chess-join {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  text-align: left;
+}
+
+.chess-share label,
+.chess-join label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chess-share-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.chess-share-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 3px solid #d7ecff;
+  border-radius: 16px;
+  background: #fff;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.chess-share-row input:focus {
+  outline: 3px solid #9bdcff;
+  border-color: var(--candy-blue);
+}
+
+.chess-share-row .button {
+  min-height: 46px;
+  padding: 8px 16px;
+  flex-shrink: 0;
+}
+
+.chess-code {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #fff3c4;
+  border: 3px solid #fff;
+  box-shadow: var(--shadow);
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  letter-spacing: 0.18em;
+  text-align: center;
+  color: var(--ink);
+}
+
+.chess-share-hint {
+  margin: 12px 0 0 !important;
+  font-weight: 800;
+}
+
+.chess-page .puzzle-score {
+  min-width: 0;
+  flex: 1;
+}
+
+.chess-page .puzzle-score strong {
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
 .simon-page {
   width: min(460px, 100%);
 }

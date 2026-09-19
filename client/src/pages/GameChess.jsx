@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ChessBoard from '../components/ChessBoard.jsx';
 import QuitGameButton from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useGameExpand } from '../hooks/useGameExpand.js';
-import { submitScore } from '../api.js';
+import { createChessRoom, submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
+import { getChessPlayerId, parseChessRoomInput } from '../game/chessRoom.js';
 import {
   CPU,
   PLAYER,
@@ -62,6 +63,7 @@ function playTone(audioRef, { type, startFreq, endFreq, duration, volume = 0.08 
 
 export default function GameChess() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [playState, setPlayState] = useState('waiting');
   const [game, setGame] = useState(initialState);
   const [selected, setSelected] = useState(null);
@@ -75,6 +77,9 @@ export default function GameChess() {
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
   const [savedAt, setSavedAt] = useState('');
+  const [joinCode, setJoinCode] = useState('');
+  const [roomBusy, setRoomBusy] = useState(false);
+  const [roomError, setRoomError] = useState('');
 
   const playStateRef = useRef(playState);
   const gameRef = useRef(game);
@@ -124,6 +129,32 @@ export default function GameChess() {
     setPlayState('ended');
     rememberBest(playerScoreRef.current);
   }, [clearTimers, rememberBest]);
+
+  async function playFriend(event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    setRoomBusy(true);
+    setRoomError('');
+    try {
+      const { roomId } = await createChessRoom(getChessPlayerId(), user?.username || 'Guest');
+      navigate(`/game/chess/room/${roomId}`);
+    } catch (err) {
+      setRoomError(err.message || 'Could not make a room');
+    } finally {
+      setRoomBusy(false);
+    }
+  }
+
+  function joinFriendRoom(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const code = parseChessRoomInput(joinCode);
+    if (code.length < 4) {
+      setRoomError('Type a room code or paste a room link');
+      return;
+    }
+    navigate(`/game/chess/room/${code}`);
+  }
 
   const beginRound = useCallback(() => {
     clearTimers();
@@ -434,26 +465,40 @@ export default function GameChess() {
           />
 
           {playState === 'waiting' && (
-            <div className="overlay" onClick={startGame}>
+            <div className="overlay">
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
                 <p>
-                  You are White. Checkmate the computer’s king to win a round. First to {WIN_SCORE}{' '}
-                  wins the match!
+                  Play the computer as White, or make a room and invite a friend with a link.
                 </p>
                 <div className="actions">
-                  <button className="button button-play" type="button">
-                    Start
+                  <button className="button button-play" type="button" onClick={startGame}>
+                    Vs computer
                   </button>
-                  <Link
-                    className="button button-secondary"
-                    to="/howto/chess"
-                    onClick={(event) => event.stopPropagation()}
-                  >
+                  <button className="button button-pink" type="button" onClick={playFriend} disabled={roomBusy}>
+                    {roomBusy ? 'Making room…' : 'Play a friend'}
+                  </button>
+                  <Link className="button button-secondary" to="/howto/chess">
                     How to play
                   </Link>
                   <QuitGameButton onClick={handleQuit} />
                 </div>
+                <form className="chess-join" onSubmit={joinFriendRoom}>
+                  <label htmlFor="chess-join-code">Have a room code or link?</label>
+                  <div className="chess-share-row">
+                    <input
+                      id="chess-join-code"
+                      value={joinCode}
+                      onChange={(event) => setJoinCode(event.target.value)}
+                      placeholder="Paste link or code"
+                      autoComplete="off"
+                    />
+                    <button className="button" type="submit">
+                      Join
+                    </button>
+                  </div>
+                </form>
+                {roomError ? <p className="error">{roomError}</p> : null}
               </div>
             </div>
           )}
