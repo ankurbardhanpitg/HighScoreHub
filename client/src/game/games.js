@@ -22,11 +22,11 @@ export const GAMES = [
     howToPath: '/howto/dino',
     emoji: '🦖',
     cardClass: 'card-dino',
-    blurb: 'Tap or press Space to jump. Clear 20 obstacles to go up a level, then beat all 5 levels to win.',
+    blurb: 'Tap or press Space to jump from the ground. You have 3 lives — clear 20 obstacles to go up a level, then beat all 5 levels to win.',
     steps: [
-      { emoji: '👆', title: 'Tap or Space', text: 'Give the dino a jump whenever you need to hop or flap higher.', cardClass: 'card-tap' },
-      { emoji: '🌵', title: 'Dodge obstacles', text: 'Leap over cacti and flap past pterodactyls. The ground is safe — bumps are not!', cardClass: 'card-dino' },
-      { emoji: '🏁', title: 'Beat 5 levels', text: 'Each obstacle is a point. Pass 20 to level up — later levels are faster. Clear all 5 to win!', cardClass: 'card-score' },
+      { emoji: '👆', title: 'Tap or Space', text: 'Jump only from the ground — tapping in the air will not keep you up. Hold a little longer for a higher hop.', cardClass: 'card-tap' },
+      { emoji: '🌵', title: 'Read the obstacle', text: 'Leap over cacti and low birds. Stay on the ground to run under high pterodactyls.', cardClass: 'card-dino' },
+      { emoji: '❤️', title: 'Three lives', text: 'A bump costs one life. You get two more tries, then the run is over. Pass 20 obstacles to level up — clear all 5 to win!', cardClass: 'card-score' },
     ],
   },
   {

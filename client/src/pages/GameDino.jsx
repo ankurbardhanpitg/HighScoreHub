@@ -75,7 +75,7 @@ export default function GameDino() {
       : playState === 'paused'
         ? 'Game paused — press Resume to keep running'
         : playState === 'playing'
-          ? 'Tap the game or press Space to jump · 20 obstacles per level · P or Esc to pause'
+          ? 'Tap or hold Space to jump · 3 lives · stay low for high birds · P or Esc to pause'
           : '';
 
   return (
@@ -98,7 +98,7 @@ export default function GameDino() {
             <div className="overlay" onClick={() => gameRef.current?.start()}>
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
-                <p>Jump over cacti, flap past pterodactyls, and clear 20 obstacles to level up. Beat all 5 levels to win!</p>
+                <p>You have 3 lives. Jump over cacti, stay low for high pterodactyls, and clear 20 obstacles to level up. You only jump from the ground — mash clicking will not keep you in the air!</p>
                 <div className="actions">
                   <button className="button button-play" type="button">
                     Start
@@ -135,7 +135,7 @@ export default function GameDino() {
                 <p>
                   {won
                     ? 'You cleared all 5 levels. What a run!'
-                    : `You reached level ${level}. Want to try for the next one?`}
+                    : `You reached level ${level} and used all 3 lives. Want to try again?`}
                 </p>
 
                 {user ? (

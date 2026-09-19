@@ -79,15 +79,20 @@ function createDinoAudio() {
 
 const GROUND_HEIGHT = 54;
 const DINO_X = 108;
-const JUMP_VELOCITY = -290;
+const JUMP_VELOCITY = -580;
+const JUMP_CUT_VELOCITY = -380;
+const COYOTE_MS = 90;
+const JUMP_LOCK_MS = 120;
+const STARTING_LIVES = 3;
+const INVULN_MS = 1600;
 const OBSTACLES_PER_LEVEL = 20;
 const MAX_LEVEL = 5;
 const LEVELS = [
-  { speed: 170, spawn: 3600, flyChance: 0.22 },
-  { speed: 198, spawn: 3300, flyChance: 0.38 },
-  { speed: 228, spawn: 3000, flyChance: 0.5 },
-  { speed: 262, spawn: 2800, flyChance: 0.62 },
-  { speed: 300, spawn: 2600, flyChance: 0.72 },
+  { speed: 180, spawn: 2800, flyChance: 0.28 },
+  { speed: 210, spawn: 2500, flyChance: 0.4 },
+  { speed: 242, spawn: 2300, flyChance: 0.5 },
+  { speed: 276, spawn: 2100, flyChance: 0.58 },
+  { speed: 312, spawn: 1900, flyChance: 0.66 },
 ];
 
 export default class DinoRunnerScene extends Phaser.Scene {
@@ -103,8 +108,12 @@ export default class DinoRunnerScene extends Phaser.Scene {
     this.level = 1;
     this.levelObstacles = 0;
     this.spawnedThisLevel = 0;
-    this.ignoreFlapUntil = 0;
-    this.canFlapAt = 0;
+    this.ignoreJumpUntil = 0;
+    this.coyoteUntil = 0;
+    this.jumpHeld = false;
+    this.airborne = false;
+    this.lives = STARTING_LIVES;
+    this.invulnUntil = 0;
     this.spawnEvent = null;
     this.audio = createDinoAudio();
     this.applyLevelSettings();
@@ -156,7 +165,7 @@ export default class DinoRunnerScene extends Phaser.Scene {
     this.hit.body.setBounce(0);
     this.hit.body.setCollideWorldBounds(false);
     this.hit.body.setAllowGravity(true);
-    this.hit.body.setMaxVelocity(0, 460);
+    this.hit.body.setMaxVelocity(0, 780);
     this.hit.setDepth(5);
 
     this.dino = this.buildDino(DINO_X, dinoY);
@@ -169,7 +178,7 @@ export default class DinoRunnerScene extends Phaser.Scene {
 
     this.physics.world.setBounds(-80, 0, GAME_WIDTH + 240, GAME_HEIGHT);
     this.physics.add.collider(this.hit, this.ground);
-    this.physics.add.overlap(this.hit, this.obstacles, this.endGame, undefined, this);
+    this.physics.add.overlap(this.hit, this.obstacles, this.onHitObstacle, undefined, this);
 
     this.scoreText = this.add.text(16, 16, 'Score: 0', {
       fontFamily: 'Arial, sans-serif',
@@ -189,6 +198,14 @@ export default class DinoRunnerScene extends Phaser.Scene {
     });
     this.levelText.setOrigin(0.5, 0.5);
     this.levelText.setDepth(10);
+
+    this.livesIcons = [];
+    for (let i = 0; i < STARTING_LIVES; i += 1) {
+      const icon = this.add.circle(GAME_WIDTH - 70 + i * 22, 26, 8, 0xff6b9d);
+      icon.setStrokeStyle(2, 0xffe1ea);
+      icon.setDepth(10);
+      this.livesIcons.push(icon);
+    }
 
     this.bannerText = this.add.text(GAME_WIDTH / 2, 96, '', {
       fontFamily: 'Arial, sans-serif',
@@ -217,9 +234,11 @@ export default class DinoRunnerScene extends Phaser.Scene {
 
     this.input.keyboard?.addCapture(['SPACE', 'P', 'ESC']);
     this.input.keyboard?.on('keydown-SPACE', this.onSpace, this);
+    this.input.keyboard?.on('keyup-SPACE', this.endJumpHold, this);
     this.input.keyboard?.on('keydown-P', this.togglePause, this);
     this.input.keyboard?.on('keydown-ESC', this.togglePause, this);
     this.input.on('pointerdown', this.onPointer, this);
+    this.input.on('pointerup', this.endJumpHold, this);
 
     this.registry.set('gameApi', {
       start: () => this.startGame(),
@@ -313,8 +332,9 @@ export default class DinoRunnerScene extends Phaser.Scene {
     this.audio.unlock();
     this.audio.start();
     this.physics.resume();
-    this.hit.body.setVelocityY(JUMP_VELOCITY);
-    this.ignoreFlapUntil = this.time.now + 180;
+    this.ignoreJumpUntil = this.time.now + 200;
+    this.jumpHeld = false;
+    this.airborne = false;
 
     this.notifyState('playing');
     this.restartSpawnTimer();
@@ -394,7 +414,8 @@ export default class DinoRunnerScene extends Phaser.Scene {
       this.spawnEvent.paused = false;
     }
     this.physics.resume();
-    this.ignoreFlapUntil = this.time.now + 180;
+    this.ignoreJumpUntil = this.time.now + 180;
+    this.jumpHeld = false;
     this.notifyState('playing');
   }
 
@@ -417,7 +438,7 @@ export default class DinoRunnerScene extends Phaser.Scene {
       return;
     }
 
-    this.flap();
+    this.jump();
   }
 
   onPointer() {
@@ -426,20 +447,38 @@ export default class DinoRunnerScene extends Phaser.Scene {
       return;
     }
 
-    this.flap();
+    this.jump();
   }
 
-  flap() {
-    if (this.ended || this.playState !== 'playing' || this.time.now < this.ignoreFlapUntil) {
+  isGrounded() {
+    return Boolean(this.hit.body?.blocked.down || this.hit.body?.touching.down);
+  }
+
+  jump() {
+    if (this.ended || this.playState !== 'playing' || this.time.now < this.ignoreJumpUntil) {
       return;
     }
-    if (this.time.now < this.canFlapAt) {
+    if (!this.isGrounded() && this.time.now > this.coyoteUntil) {
       return;
     }
 
-    this.canFlapAt = this.time.now + 140;
+    this.airborne = true;
+    this.jumpHeld = true;
+    this.coyoteUntil = 0;
+    this.ignoreJumpUntil = this.time.now + JUMP_LOCK_MS;
+    this.hit.body.setGravityY(0);
     this.hit.body.setVelocityY(JUMP_VELOCITY);
     this.audio.flap();
+  }
+
+  endJumpHold() {
+    this.jumpHeld = false;
+    if (this.ended || this.playState !== 'playing' || !this.hit.body) {
+      return;
+    }
+    if (this.hit.body.velocity.y < JUMP_CUT_VELOCITY) {
+      this.hit.body.setVelocityY(JUMP_CUT_VELOCITY);
+    }
   }
 
   addObstacle(x, y, width, height, art) {
@@ -464,24 +503,30 @@ export default class DinoRunnerScene extends Phaser.Scene {
       return;
     }
 
-    this.spawnedThisLevel += 1;
+    const remaining = OBSTACLES_PER_LEVEL - this.spawnedThisLevel;
     const roll = Math.random();
 
-    if (this.level >= 2 && roll < this.flyChance * 0.45) {
-      this.spawnGate(x);
+    if (remaining >= 2 && this.level >= 2 && roll < this.flyChance * 0.4) {
+      this.spawnJumpThenDuck(x);
+      return;
+    }
+    if (remaining >= 2 && this.level >= 3 && roll < this.flyChance * 0.7) {
+      this.spawnDoubleCactus(x);
       return;
     }
     if (roll < this.flyChance) {
-      this.spawnPtero(x);
+      this.spawnPtero(x, Math.random() < 0.7);
+      this.spawnedThisLevel += 1;
       return;
     }
     this.spawnCactus(x);
+    this.spawnedThisLevel += 1;
   }
 
-  spawnCactus(x) {
-    const tall = Math.random() < 0.48;
-    const width = tall ? 34 : 26;
-    const height = tall ? 78 : 52;
+  spawnCactus(x, size) {
+    const tall = size ? size === 'tall' : Math.random() < 0.4 + this.level * 0.06;
+    const width = tall ? 32 : 24;
+    const height = tall ? 68 : 46;
     const y = GAME_HEIGHT - GROUND_HEIGHT - height / 2;
     const art = this.add.container(x, y);
     const stem = this.add.rectangle(0, 2, width, height - 6, 0x3d9a4a);
@@ -501,28 +546,24 @@ export default class DinoRunnerScene extends Phaser.Scene {
     this.addObstacle(x, y, width - 2, height - 8, art);
   }
 
-  spawnPtero(x) {
-    const high = Math.random() < 0.55;
-    const y = high ? 214 : 258;
+  spawnPtero(x, high = Math.random() < 0.6) {
+    const y = high ? 248 : 300;
+    const height = high ? 24 : 22;
     const art = this.buildPtero(x, y);
-    const body = this.addObstacle(x, y, 38, 18, art);
+    const body = this.addObstacle(x, y, 42, height, art);
     body.kind = 'ptero';
   }
 
-  spawnGate(x) {
-    const cactusHeight = Phaser.Math.Between(36, 58);
-    const cactusY = GAME_HEIGHT - GROUND_HEIGHT - cactusHeight / 2;
-    const cactusArt = this.add.container(x, cactusY);
-    cactusArt.add(this.add.rectangle(0, 2, 18, cactusHeight - 6, 0x3d9a4a));
-    cactusArt.add(this.add.ellipse(0, -cactusHeight / 2 + 6, 22, 14, 0x4caf50));
-    cactusArt.setDepth(5);
-    const cactus = this.addObstacle(x, cactusY, 16, cactusHeight - 8, cactusArt);
-    cactus.scored = true;
+  spawnJumpThenDuck(x) {
+    this.spawnCactus(x, 'short');
+    this.spawnPtero(x + Phaser.Math.Between(118, 160), true);
+    this.spawnedThisLevel += 2;
+  }
 
-    const gap = Phaser.Math.Between(108, 138);
-    const pteroY = cactusY - cactusHeight / 2 - gap;
-    const pteroArt = this.buildPtero(x, pteroY);
-    this.addObstacle(x, pteroY, 38, 18, pteroArt).kind = 'ptero';
+  spawnDoubleCactus(x) {
+    this.spawnCactus(x, 'short');
+    this.spawnCactus(x + Phaser.Math.Between(52, 78), Math.random() < 0.5 ? 'tall' : 'short');
+    this.spawnedThisLevel += 2;
   }
 
   buildPtero(x, y) {
@@ -566,6 +607,13 @@ export default class DinoRunnerScene extends Phaser.Scene {
     this.dino.setRotation(
       grounded ? 0 : Phaser.Math.Clamp(this.hit.body.velocity.y / 900, -0.28, 0.42)
     );
+
+    if (this.time.now < this.invulnUntil) {
+      const pulse = 0.35 + 0.45 * Math.abs(Math.sin(this.time.now / 70));
+      this.dino.setAlpha(pulse);
+    } else {
+      this.dino.setAlpha(1);
+    }
   }
 
   update(_time, delta) {
@@ -575,12 +623,30 @@ export default class DinoRunnerScene extends Phaser.Scene {
       return;
     }
 
+    const grounded = this.isGrounded();
+    if (grounded) {
+      this.airborne = false;
+      this.coyoteUntil = this.time.now + COYOTE_MS;
+      this.hit.body.setGravityY(0);
+    } else {
+      this.airborne = true;
+      if (this.hit.body.velocity.y > 40) {
+        this.hit.body.setGravityY(680);
+      } else {
+        this.hit.body.setGravityY(0);
+      }
+    }
+
     if (this.hit.y < 8) {
       this.hit.y = 8;
       this.hit.body.setVelocityY(Math.max(0, this.hit.body.velocity.y));
     }
     if (this.hit.y > GAME_HEIGHT) {
-      this.endGame();
+      this.loseLife();
+      if (!this.ended) {
+        this.hit.y = GAME_HEIGHT - GROUND_HEIGHT - 22;
+        this.hit.body.setVelocityY(0);
+      }
       return;
     }
 
@@ -637,6 +703,44 @@ export default class DinoRunnerScene extends Phaser.Scene {
     });
   }
 
+  refreshLives() {
+    this.livesIcons.forEach((icon, index) => {
+      icon.setVisible(index < this.lives);
+    });
+  }
+
+  onHitObstacle(_dino, obstacle) {
+    if (this.ended || this.playState !== 'playing' || this.time.now < this.invulnUntil) {
+      return;
+    }
+
+    if (obstacle?.active) {
+      obstacle.art?.destroy();
+      obstacle.destroy();
+    }
+
+    this.loseLife();
+  }
+
+  loseLife() {
+    if (this.ended || this.playState !== 'playing' || this.time.now < this.invulnUntil) {
+      return;
+    }
+
+    this.lives -= 1;
+    this.invulnUntil = this.time.now + INVULN_MS;
+    this.audio.hit();
+    this.cameras.main.shake(110, 0.008);
+    this.refreshLives();
+
+    if (this.lives <= 0) {
+      this.endGame();
+      return;
+    }
+
+    this.showBanner(this.lives === 1 ? '1 life left!' : `${this.lives} lives left!`);
+  }
+
   finishRun(won) {
     if (this.ended) {
       return;
@@ -672,7 +776,6 @@ export default class DinoRunnerScene extends Phaser.Scene {
       return;
     }
 
-    this.audio.hit();
     this.finishRun(false);
   }
 }

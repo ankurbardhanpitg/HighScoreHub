@@ -42,7 +42,7 @@ const DinoRunnerContainer = forwardRef(function DinoRunnerContainer({ onGameOver
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 680 },
+          gravity: { y: 1280 },
           debug: false,
         },
       },
