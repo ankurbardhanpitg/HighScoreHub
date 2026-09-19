@@ -936,6 +936,10 @@ main {
   background: #ffe4c4;
 }
 
+.card-towerdefense span {
+  background: #d8f5d3;
+}
+
 .card-simon span {
   background: #e8dcff;
 }
@@ -1207,6 +1211,17 @@ main {
 }
 
 .chase-stage {
+  background: linear-gradient(180deg, #fff, #e4f8e8);
+  box-shadow: var(--shadow), 0 10px 0 #3d9a2a;
+}
+
+.towerdefense-canvas {
+  background: #4f9a3e;
+  touch-action: none;
+  user-select: none;
+}
+
+.towerdefense-stage {
   background: linear-gradient(180deg, #fff, #e4f8e8);
   box-shadow: var(--shadow), 0 10px 0 #3d9a2a;
 }
