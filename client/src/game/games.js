@@ -30,6 +30,21 @@ export const GAMES = [
     ],
   },
   {
+    id: 'chase',
+    name: 'Chase',
+    shortName: 'Chase',
+    path: '/game/chase',
+    howToPath: '/howto/chase',
+    emoji: '🏃',
+    cardClass: 'card-chase',
+    blurb: 'Grab the stars and stay ahead of the chasers. You have 3 lives — a new chaser joins every level. Clear all 10 levels to win.',
+    steps: [
+      { emoji: '👆', title: 'Move around', text: 'Slide a finger, move the mouse, or use the arrow keys / WASD.', cardClass: 'card-tap' },
+      { emoji: '⭐', title: 'Grab the stars', text: 'Collect every yellow star on the field. Weave around the bushes if you need a shortcut.', cardClass: 'card-chase' },
+      { emoji: '👾', title: 'Don’t get tagged', text: 'Chasers hunt you down. You have 3 lives. Each new level adds one more chaser, a little slower as the pack grows. Clear all 10 to win!', cardClass: 'card-score' },
+    ],
+  },
+  {
     id: '2048',
     name: '2048',
     shortName: '2048',

@@ -16,6 +16,7 @@ import GameTicTacToe from './pages/GameTicTacToe.jsx';
 import GameConnectFour from './pages/GameConnectFour.jsx';
 import GameSimon from './pages/GameSimon.jsx';
 import GameDino from './pages/GameDino.jsx';
+import GameChase from './pages/GameChase.jsx';
 import HowTo from './pages/HowTo.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import SignIn from './pages/SignIn.jsx';
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="/game/connectfour" element={<GameConnectFour />} />
           <Route path="/game/simon" element={<GameSimon />} />
           <Route path="/game/dino" element={<GameDino />} />
+          <Route path="/game/chase" element={<GameChase />} />
           <Route
             path="/leaderboard"
             element={

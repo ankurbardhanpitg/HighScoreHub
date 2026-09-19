@@ -6,6 +6,7 @@ Games on the hub:
 
 - Flappy Bird
 - Dino Runner (jump over cacti, flap past pterodactyls, beat 5 levels)
+- Chase (grab the stars, dodge the chasers, beat 10 levels)
 - 2048 (slide tiles, merge matching numbers, chase a high score)
 - Whack-a-Mole (tap moles as they pop up, 30-second reflex round)
 - Pong (one player vs the computer, first to 5)
@@ -67,7 +68,7 @@ Auth:
 
 Scores:
 
-- `POST /api/scores` — body `{ "score": 12, "game": "flappy" }`, requires a signed-in user. The player name is taken from the account username. `game` can be `"flappy"`, `"dino"`, `"2048"`, `"whack"`, `"pong"`, `"breakout"`, `"starwaves"`, `"bubble"`, `"snake"`, `"tictactoe"`, `"connectfour"`, or `"simon"` and defaults to `"flappy"`.
+- `POST /api/scores` — body `{ "score": 12, "game": "flappy" }`, requires a signed-in user. The player name is taken from the account username. `game` can be `"flappy"`, `"dino"`, `"chase"`, `"2048"`, `"whack"`, `"pong"`, `"breakout"`, `"starwaves"`, `"bubble"`, `"snake"`, `"tictactoe"`, `"connectfour"`, or `"simon"` and defaults to `"flappy"`.
 - `GET /api/scores/top?page=1&limit=10&game=flappy` — paginated scores for one game, newest date first. Requires a signed-in user. Defaults to page 1, 10 records, and the Flappy Bird board.
 
 ## Run the client

@@ -940,6 +940,10 @@ main {
   background: #ffe4c4;
 }
 
+.card-chase span {
+  background: #d8f5d3;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -1190,6 +1194,17 @@ main {
 .dino-stage {
   background: linear-gradient(180deg, #1a1448, #0b1026);
   box-shadow: var(--shadow), 0 10px 0 #3d2a9e;
+}
+
+.chase-canvas {
+  background: #7ecf8a;
+  touch-action: none;
+  user-select: none;
+}
+
+.chase-stage {
+  background: linear-gradient(180deg, #fff, #e4f8e8);
+  box-shadow: var(--shadow), 0 10px 0 #3d9a2a;
 }
 
 .game-fabs {
