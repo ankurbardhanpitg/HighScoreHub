@@ -168,7 +168,6 @@ export default function GameChessRoom() {
 
   const youWon = ended && room?.result === color;
   const theyWon = ended && room?.result && room.result !== 'draw' && room.result !== color;
-  const overlayOpen = Boolean(error) || !room || waiting || ended;
 
   let turnText = yourTurn
     ? 'Your turn — tap a piece, then tap where it can go'
@@ -193,159 +192,143 @@ export default function GameChessRoom() {
     turnText = 'Your friend disconnected. Wait a moment — they can rejoin this same link.';
   }
 
-  const kicker = waiting
-    ? 'Invite a friend with the room link · you are White, they are Black'
-    : playing
-      ? `You are ${color === WHITE ? 'White' : 'Black'} · play live with ${opponentName || 'your friend'}`
-      : '';
-
   return (
-    <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
-      {kicker ? <p className="game-kicker">{kicker}</p> : null}
-
+    <section className={`game-wrap chess-wrap${isExpanded ? ' is-expanded' : ''}`}>
       <div className={`puzzle-page chess-page${isExpanded ? ' is-expanded' : ''}`}>
-        <div className="puzzle-hud">
-          <div className="puzzle-scores">
-            <div className="puzzle-score">
-              <span>You</span>
-              <strong>{youName || displayName}</strong>
-            </div>
-            <div className={`puzzle-score${playing && !opponentConnected ? ' is-urgent' : ''}`}>
-              <span>Friend</span>
-              <strong>{waiting ? '…' : opponentName || 'Guest'}</strong>
-            </div>
-            <div className="puzzle-score">
-              <span>You play</span>
-              <strong>{color === WHITE ? 'White' : 'Black'}</strong>
-            </div>
+        <div className="chess-layout">
+          <div className="puzzle-stage chess-stage">
+            <ChessBoard
+              board={game?.board || Array.from({ length: 64 }, () => null)}
+              selected={selected}
+              legalTargets={legalTargets}
+              lastMove={room?.lastMove}
+              checkSquare={checkSquare}
+              pendingPromotion={pendingPromotion}
+              onSquare={handleSquare}
+              onPromote={handlePromote}
+              onCancelPromote={() => setPendingPromotion(null)}
+              disabled={boardLocked}
+              playerColor={color}
+            />
           </div>
-          <div className="puzzle-hud-actions">
-            {playing ? (
-              <button className="button button-pink puzzle-new" type="button" onClick={resign}>
-                Resign
-              </button>
-            ) : null}
-            <QuitGameButton className="button button-secondary puzzle-new" onClick={handleQuit} />
-          </div>
-        </div>
 
-        {room ? <p className="ttt-turn">{turnText}</p> : null}
-
-        {game && (playing || ended) ? (
-          <div className="chess-captures" aria-label="Captured pieces">
-            <p>
-              <span>{color === WHITE ? 'You took' : `${room.names?.w || 'White'} took`}</span>
-              <strong>
-                {captured.byWhite.length > 0
-                  ? captured.byWhite.map((piece, index) => (
-                      <span key={`w-${piece}-${index}`}>{glyphOf(piece)}</span>
-                    ))
-                  : '—'}
-              </strong>
-            </p>
-            <p>
-              <span>{color === BLACK ? 'You took' : `${room.names?.b || 'Black'} took`}</span>
-              <strong>
-                {captured.byBlack.length > 0
-                  ? captured.byBlack.map((piece, index) => (
-                      <span key={`b-${piece}-${index}`}>{glyphOf(piece)}</span>
-                    ))
-                  : '—'}
-              </strong>
-            </p>
-          </div>
-        ) : null}
-
-        <div className="puzzle-stage chess-stage">
-          <ChessBoard
-            board={game?.board || Array.from({ length: 64 }, () => null)}
-            selected={selected}
-            legalTargets={legalTargets}
-            lastMove={room?.lastMove}
-            checkSquare={checkSquare}
-            pendingPromotion={pendingPromotion}
-            onSquare={handleSquare}
-            onPromote={handlePromote}
-            onCancelPromote={() => setPendingPromotion(null)}
-            disabled={boardLocked}
-            playerColor={color}
-          />
-
-          {overlayOpen ? (
-            <div className="overlay">
-              <div className={`panel overlay-panel${youWon ? ' overlay-win' : ''}`}>
-                {error ? (
-                  <>
-                    <h2>Can’t join</h2>
-                    <p>{error}</p>
-                    <div className="actions">
-                      <Link className="button button-play" to="/game/chess">
-                        Back to chess
-                      </Link>
-                      <QuitGameButton onClick={handleQuit} />
-                    </div>
-                  </>
-                ) : ended ? (
-                  <>
-                    <h2>{youWon ? 'You win!' : theyWon ? 'Nice try!' : 'Draw!'}</h2>
-                    <p>
-                      {youWon
-                        ? room?.reason === 'resign'
-                          ? 'Your friend resigned. Want another game?'
-                          : 'Checkmate! Want another game in this room?'
-                        : theyWon
-                          ? room?.reason === 'resign'
-                            ? 'You resigned this game. Try again?'
-                            : 'Your friend got checkmate. Try again?'
-                          : 'Nobody can checkmate from here. Play again?'}
-                    </p>
-                    <div className="actions">
-                      <button className="button button-play" type="button" onClick={rematch}>
-                        Play again
-                      </button>
-                      <Link className="button" to="/game/chess">
-                        Vs computer
-                      </Link>
-                      <QuitGameButton onClick={handleQuit} />
-                    </div>
-                  </>
-                ) : waiting ? (
-                  <>
-                    <h2>Invite a friend</h2>
-                    <p>Share this link or room code. When they open it, you play chess together.</p>
-                    <div className="chess-share">
-                      <p className="chess-code" aria-label="Room code">
-                        {room.id}
-                      </p>
-                      <label htmlFor="chess-share-url">Room link</label>
-                      <div className="chess-share-row">
-                        <input id="chess-share-url" readOnly value={shareUrl} onFocus={(event) => event.target.select()} />
-                        <button className="button" type="button" onClick={copyShareLink}>
-                          {copied ? 'Copied!' : 'Copy link'}
-                        </button>
-                      </div>
-                      {copyError ? <p className="error">{copyError}</p> : null}
-                    </div>
-                    <p className="chess-share-hint">You are White. They will be Black. Waiting for them to join…</p>
-                    <div className="actions">
-                      <Link className="button button-secondary" to="/game/chess">
-                        Vs computer
-                      </Link>
-                      <QuitGameButton onClick={handleQuit} />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <h2>Connecting…</h2>
-                    <p>Joining the chess room.</p>
-                    <div className="actions">
-                      <QuitGameButton onClick={handleQuit} />
-                    </div>
-                  </>
-                )}
+          <aside className="chess-side">
+            <div className="puzzle-hud">
+              <div className="puzzle-scores">
+                <div className="puzzle-score">
+                  <span>You</span>
+                  <strong>{youName || displayName}</strong>
+                </div>
+                <div className={`puzzle-score${playing && !opponentConnected ? ' is-urgent' : ''}`}>
+                  <span>Friend</span>
+                  <strong>{waiting ? '…' : opponentName || 'Guest'}</strong>
+                </div>
+                <div className="puzzle-score">
+                  <span>You play</span>
+                  <strong>{color === WHITE ? 'White' : 'Black'}</strong>
+                </div>
+              </div>
+              <div className="puzzle-hud-actions">
+                {playing ? (
+                  <button className="button button-pink puzzle-new" type="button" onClick={resign}>
+                    Resign
+                  </button>
+                ) : null}
+                <QuitGameButton className="button button-secondary puzzle-new" onClick={handleQuit} />
               </div>
             </div>
-          ) : null}
+
+            {room ? <p className="ttt-turn">{turnText}</p> : null}
+
+            {game && (playing || ended) ? (
+              <div className="chess-captures" aria-label="Captured pieces">
+                <p>
+                  <span>{color === WHITE ? 'You took' : `${room.names?.w || 'White'} took`}</span>
+                  <strong>
+                    {captured.byWhite.length > 0
+                      ? captured.byWhite.map((piece, index) => (
+                          <span key={`w-${piece}-${index}`}>{glyphOf(piece)}</span>
+                        ))
+                      : '—'}
+                  </strong>
+                </p>
+                <p>
+                  <span>{color === BLACK ? 'You took' : `${room.names?.b || 'Black'} took`}</span>
+                  <strong>
+                    {captured.byBlack.length > 0
+                      ? captured.byBlack.map((piece, index) => (
+                          <span key={`b-${piece}-${index}`}>{glyphOf(piece)}</span>
+                        ))
+                      : '—'}
+                  </strong>
+                </p>
+              </div>
+            ) : null}
+
+            {error ? (
+              <div className="chess-panel">
+                <h2>Can’t join</h2>
+                <p>{error}</p>
+                <div className="actions">
+                  <Link className="button button-play" to="/game/chess">
+                    Back to chess
+                  </Link>
+                </div>
+              </div>
+            ) : ended ? (
+              <div className={`chess-panel${youWon ? ' overlay-win' : ''}`}>
+                <h2>{youWon ? 'You win!' : theyWon ? 'Nice try!' : 'Draw!'}</h2>
+                <p>
+                  {youWon
+                    ? room?.reason === 'resign'
+                      ? 'Your friend resigned. Want another game?'
+                      : 'Checkmate! Want another game in this room?'
+                    : theyWon
+                      ? room?.reason === 'resign'
+                        ? 'You resigned this game. Try again?'
+                        : 'Your friend got checkmate. Try again?'
+                      : 'Nobody can checkmate from here. Play again?'}
+                </p>
+                <div className="actions">
+                  <button className="button button-play" type="button" onClick={rematch}>
+                    Play again
+                  </button>
+                  <Link className="button" to="/game/chess">
+                    Vs computer
+                  </Link>
+                </div>
+              </div>
+            ) : waiting ? (
+              <div className="chess-panel">
+                <h2>Invite a friend</h2>
+                <p>Share this link or room code. When they open it, you play chess together.</p>
+                <div className="chess-share">
+                  <p className="chess-code" aria-label="Room code">
+                    {room.id}
+                  </p>
+                  <label htmlFor="chess-share-url">Room link</label>
+                  <div className="chess-share-row">
+                    <input id="chess-share-url" readOnly value={shareUrl} onFocus={(event) => event.target.select()} />
+                    <button className="button" type="button" onClick={copyShareLink}>
+                      {copied ? 'Copied!' : 'Copy link'}
+                    </button>
+                  </div>
+                  {copyError ? <p className="error">{copyError}</p> : null}
+                </div>
+                <p className="chess-share-hint">You are White. They will be Black. Waiting for them to join…</p>
+                <div className="actions">
+                  <Link className="button button-secondary" to="/game/chess">
+                    Vs computer
+                  </Link>
+                </div>
+              </div>
+            ) : !room ? (
+              <div className="chess-panel">
+                <h2>Connecting…</h2>
+                <p>Joining the chess room.</p>
+              </div>
+            ) : null}
+          </aside>
         </div>
       </div>
     </section>

@@ -368,12 +368,6 @@ export default function GameChess() {
   const playing = playState === 'playing';
   const boardLocked = overlayOpen || game.turn !== PLAYER || Boolean(roundResult);
   const playerWonMatch = playerScore >= WIN_SCORE;
-  const kicker =
-    playState === 'waiting'
-      ? `Press Start, then move your white pieces · first to ${WIN_SCORE} wins`
-      : playState === 'playing'
-        ? `You are White · tap a piece, then a dotted square · first to ${WIN_SCORE} beats the computer`
-        : '';
 
   let turnText = 'Your turn — tap a piece, then tap where it can go';
   if (roundResult === PLAYER) {
@@ -394,82 +388,83 @@ export default function GameChess() {
   }
 
   return (
-    <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
-      {kicker ? <p className="game-kicker">{kicker}</p> : null}
-
+    <section className={`game-wrap chess-wrap${isExpanded ? ' is-expanded' : ''}`}>
       <div className={`puzzle-page chess-page${isExpanded ? ' is-expanded' : ''}`}>
-        <div className="puzzle-hud">
-          <div className="puzzle-scores">
-            <div className="puzzle-score">
-              <span>You</span>
-              <strong>{playerScore}</strong>
-            </div>
-            <div className="puzzle-score">
-              <span>CPU</span>
-              <strong>{cpuScore}</strong>
-            </div>
-            <div className="puzzle-score">
-              <span>Best</span>
-              <strong>{best}</strong>
-            </div>
+        <div className="chess-layout">
+          <div className="puzzle-stage chess-stage">
+            <ChessBoard
+              board={game.board}
+              selected={selected}
+              legalTargets={legalTargets}
+              lastMove={lastMove}
+              checkSquare={checkSquare}
+              pendingPromotion={pendingPromotion}
+              onSquare={handleSquare}
+              onPromote={handlePromote}
+              onCancelPromote={() => setPendingPromotion(null)}
+              disabled={boardLocked}
+            />
           </div>
-          <div className="puzzle-hud-actions">
+
+          <aside className="chess-side">
+            <div className="puzzle-hud">
+              <div className="puzzle-scores">
+                <div className="puzzle-score">
+                  <span>You</span>
+                  <strong>{playerScore}</strong>
+                </div>
+                <div className="puzzle-score">
+                  <span>CPU</span>
+                  <strong>{cpuScore}</strong>
+                </div>
+                <div className="puzzle-score">
+                  <span>Best</span>
+                  <strong>{best}</strong>
+                </div>
+              </div>
+              <div className="puzzle-hud-actions">
+                {playing ? (
+                  <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
+                    Restart
+                  </button>
+                ) : null}
+                <QuitGameButton className="button button-secondary puzzle-new" onClick={handleQuit} />
+              </div>
+            </div>
+
+            {playing ? <p className="ttt-turn">{turnText}</p> : null}
+
             {playing ? (
-              <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
-                Restart
-              </button>
+              <div className="chess-captures" aria-label="Captured pieces">
+                <p>
+                  <span>You took</span>
+                  <strong>
+                    {captured.byWhite.length > 0
+                      ? captured.byWhite.map((piece, index) => (
+                          <span key={`w-${piece}-${index}`}>{glyphOf(piece)}</span>
+                        ))
+                      : '—'}
+                  </strong>
+                </p>
+                <p>
+                  <span>CPU took</span>
+                  <strong>
+                    {captured.byBlack.length > 0
+                      ? captured.byBlack.map((piece, index) => (
+                          <span key={`b-${piece}-${index}`}>{glyphOf(piece)}</span>
+                        ))
+                      : '—'}
+                  </strong>
+                </p>
+              </div>
             ) : null}
-            <QuitGameButton className="button button-secondary puzzle-new" onClick={handleQuit} />
-          </div>
-        </div>
 
-        {playing ? <p className="ttt-turn">{turnText}</p> : null}
-
-        {playing ? (
-          <div className="chess-captures" aria-label="Captured pieces">
-            <p>
-              <span>You took</span>
-              <strong>
-                {captured.byWhite.length > 0
-                  ? captured.byWhite.map((piece, index) => (
-                      <span key={`w-${piece}-${index}`}>{glyphOf(piece)}</span>
-                    ))
-                  : '—'}
-              </strong>
-            </p>
-            <p>
-              <span>CPU took</span>
-              <strong>
-                {captured.byBlack.length > 0
-                  ? captured.byBlack.map((piece, index) => (
-                      <span key={`b-${piece}-${index}`}>{glyphOf(piece)}</span>
-                    ))
-                  : '—'}
-              </strong>
-            </p>
-          </div>
-        ) : null}
-
-        <div className="puzzle-stage chess-stage">
-          <ChessBoard
-            board={game.board}
-            selected={selected}
-            legalTargets={legalTargets}
-            lastMove={lastMove}
-            checkSquare={checkSquare}
-            pendingPromotion={pendingPromotion}
-            onSquare={handleSquare}
-            onPromote={handlePromote}
-            onCancelPromote={() => setPendingPromotion(null)}
-            disabled={boardLocked}
-          />
-
-          {playState === 'waiting' && (
-            <div className="overlay">
-              <div className="panel overlay-panel">
+            {playState === 'waiting' ? (
+              <div className="chess-panel">
                 <h2>Ready?</h2>
                 <p>
-                  Play the computer as White, or make a room and invite a friend with a link.
+                  Play the computer as White, or make a room and invite a friend with a link. First to{' '}
+                  {WIN_SCORE} beats the computer.
                 </p>
                 <div className="actions">
                   <button className="button button-play" type="button" onClick={startGame}>
@@ -481,7 +476,6 @@ export default function GameChess() {
                   <Link className="button button-secondary" to="/howto/chess">
                     How to play
                   </Link>
-                  <QuitGameButton onClick={handleQuit} />
                 </div>
                 <form className="chess-join" onSubmit={joinFriendRoom}>
                   <label htmlFor="chess-join-code">Have a room code or link?</label>
@@ -500,12 +494,10 @@ export default function GameChess() {
                 </form>
                 {roomError ? <p className="error">{roomError}</p> : null}
               </div>
-            </div>
-          )}
+            ) : null}
 
-          {playState === 'ended' && (
-            <div className="overlay">
-              <div className={`panel overlay-panel${playerWonMatch ? ' overlay-win' : ''}`}>
+            {playState === 'ended' ? (
+              <div className={`chess-panel${playerWonMatch ? ' overlay-win' : ''}`}>
                 <h2>{playerWonMatch ? 'You win!' : 'Nice try!'}</h2>
                 <p className="final-score">
                   {playerScore} – {cpuScore}
@@ -550,11 +542,10 @@ export default function GameChess() {
                       High scores
                     </Link>
                   ) : null}
-                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
-            </div>
-          )}
+            ) : null}
+          </aside>
         </div>
       </div>
     </section>
