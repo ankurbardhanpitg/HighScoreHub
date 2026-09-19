@@ -1,7 +1,9 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import GameContainer from '../components/GameContainer.jsx';
+import QuitGameButton, { GamePlayFabs } from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useGameExpand } from '../hooks/useGameExpand.js';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
 
@@ -12,12 +14,16 @@ export default function Game() {
   const [playState, setPlayState] = useState('waiting');
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [won, setWon] = useState(false);
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
   const [savedAt, setSavedAt] = useState('');
 
-  const handleGameOver = useCallback((finalScore) => {
+  const handleGameOver = useCallback((finalScore, finalLevel = 1, didWin = false) => {
     setScore(finalScore);
+    setLevel(finalLevel);
+    setWon(didWin);
     setIsGameOver(true);
     setPlayState('ended');
     setSubmitState('idle');
@@ -25,10 +31,18 @@ export default function Game() {
     setSavedAt('');
   }, []);
 
+  const { isExpanded, handleQuit } = useGameExpand({
+    playState,
+    isGameOver,
+    onPause: () => gameRef.current?.pause(),
+  });
+
   function playAgain() {
     setIsGameOver(false);
     setPlayState('waiting');
     setScore(0);
+    setLevel(1);
+    setWon(false);
     setSubmitState('idle');
     setSubmitError('');
     setSavedAt('');
@@ -61,13 +75,13 @@ export default function Game() {
       : playState === 'paused'
         ? 'Game paused — press Resume to keep flying'
         : playState === 'playing'
-          ? 'Tap the game or press Space to flap · P or Esc to pause'
+          ? 'Tap the game or press Space to flap · 20 pipes per level · P or Esc to pause'
           : '';
 
   return (
-    <section className="game-wrap">
+    <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
-      <div className="game-page">
+      <div className={`game-page${isExpanded ? ' is-expanded' : ''}`}>
         <div className="game-stage">
           <GameContainer
             key={gameKey}
@@ -77,16 +91,14 @@ export default function Game() {
           />
 
           {playState === 'playing' && (
-            <button className="button button-pink pause-fab" type="button" onClick={() => gameRef.current?.pause()}>
-              Pause
-            </button>
+            <GamePlayFabs onPause={() => gameRef.current?.pause()} onQuit={handleQuit} />
           )}
 
           {playState === 'waiting' && (
             <div className="overlay" onClick={() => gameRef.current?.start()}>
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
-                <p>Tap Start, then flap to fly through the pipes.</p>
+                <p>Clear 20 pipes to go up a level. Beat all 5 levels to win!</p>
                 <div className="actions">
                   <button className="button button-play" type="button">
                     Start
@@ -94,6 +106,7 @@ export default function Game() {
                   <Link className="button button-secondary" to="/howto/flappy" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -108,6 +121,7 @@ export default function Game() {
                   <button className="button button-play" type="button" onClick={() => gameRef.current?.resume()}>
                     Resume
                   </button>
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>
@@ -115,9 +129,14 @@ export default function Game() {
 
           {isGameOver && (
             <div className="overlay">
-              <div className="panel overlay-panel">
-                <h2>Oh no!</h2>
+              <div className={`panel overlay-panel${won ? ' overlay-win' : ''}`}>
+                <h2>{won ? 'You win!' : 'Oh no!'}</h2>
                 <p className="final-score">You scored {score}!</p>
+                <p>
+                  {won
+                    ? 'You cleared all 5 levels. What a flight!'
+                    : `You reached level ${level}. Want to try for the next one?`}
+                </p>
 
                 {user ? (
                   <form onSubmit={handleSubmit} className="score-form">
@@ -153,6 +172,7 @@ export default function Game() {
                       High scores
                     </Link>
                   ) : null}
+                  <QuitGameButton onClick={handleQuit} />
                 </div>
               </div>
             </div>

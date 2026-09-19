@@ -1,8 +1,11 @@
 import 'dotenv/config';
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import { connectDb } from './db.js';
+import { attachChessSockets } from './chessRooms.js';
 import authRouter from './routes/auth.js';
+import chessRouter from './routes/chess.js';
 import scoresRouter from './routes/scores.js';
 
 const app = express();
@@ -24,11 +27,14 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/chess', chessRouter);
 app.use('/api/scores', scoresRouter);
 
 async function start() {
   await connectDb();
-  app.listen(PORT, () => {
+  const server = http.createServer(app);
+  attachChessSockets(server, CLIENT_ORIGIN);
+  server.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);
   });
 }

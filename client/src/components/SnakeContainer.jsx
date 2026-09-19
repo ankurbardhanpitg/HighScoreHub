@@ -1,8 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import Phaser from 'phaser';
-import FlappyScene, { GAME_HEIGHT, GAME_WIDTH } from '../game/FlappyScene.js';
+import SnakeScene, { GAME_HEIGHT, GAME_WIDTH } from '../game/SnakeScene.js';
 
-const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateChange }, ref) {
+const SnakeContainer = forwardRef(function SnakeContainer({ onGameOver, onStateChange }, ref) {
   const containerRef = useRef(null);
   const gameRef = useRef(null);
   const onGameOverRef = useRef(onGameOver);
@@ -38,20 +38,20 @@ const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateCha
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
       parent: containerRef.current,
-      backgroundColor: '#3d96b4',
+      backgroundColor: '#1d4d3a',
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 260 },
+          gravity: { y: 0 },
           debug: false,
         },
       },
-      scene: FlappyScene,
+      scene: SnakeScene,
     };
 
     const game = new Phaser.Game(config);
-    game.registry.set('onGameOver', (score, level, won) => {
-      onGameOverRef.current?.(score, level, won);
+    game.registry.set('onGameOver', (score, level, length) => {
+      onGameOverRef.current?.(score, level, length);
     });
     game.registry.set('onStateChange', (state) => {
       onStateChangeRef.current?.(state);
@@ -64,7 +64,7 @@ const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateCha
     };
   }, []);
 
-  return <div ref={containerRef} className="game-canvas" />;
+  return <div ref={containerRef} className="game-canvas snake-canvas" />;
 });
 
-export default GameContainer;
+export default SnakeContainer;

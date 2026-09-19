@@ -1,8 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import Phaser from 'phaser';
-import FlappyScene, { GAME_HEIGHT, GAME_WIDTH } from '../game/FlappyScene.js';
+import ChaseScene, { GAME_HEIGHT, GAME_WIDTH } from '../game/ChaseScene.js';
 
-const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateChange }, ref) {
+const ChaseContainer = forwardRef(function ChaseContainer({ onGameOver, onStateChange }, ref) {
   const containerRef = useRef(null);
   const gameRef = useRef(null);
   const onGameOverRef = useRef(onGameOver);
@@ -38,15 +38,15 @@ const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateCha
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
       parent: containerRef.current,
-      backgroundColor: '#3d96b4',
+      backgroundColor: '#7ecf8a',
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 260 },
+          gravity: { y: 0 },
           debug: false,
         },
       },
-      scene: FlappyScene,
+      scene: ChaseScene,
     };
 
     const game = new Phaser.Game(config);
@@ -64,7 +64,7 @@ const GameContainer = forwardRef(function GameContainer({ onGameOver, onStateCha
     };
   }, []);
 
-  return <div ref={containerRef} className="game-canvas" />;
+  return <div ref={containerRef} className="game-canvas chase-canvas" />;
 });
 
-export default GameContainer;
+export default ChaseContainer;

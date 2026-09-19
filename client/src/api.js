@@ -71,6 +71,13 @@ export function submitScore(score, game = 'flappy') {
   });
 }
 
+export function createChessRoom(playerId, name) {
+  return request('/api/chess/rooms', {
+    method: 'POST',
+    body: JSON.stringify({ playerId, name }),
+  });
+}
+
 export function fetchTopScores(page = 1, limit = 10, game = 'flappy') {
   const params = new URLSearchParams({
     page: String(page),

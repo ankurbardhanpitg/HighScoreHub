@@ -1,28 +1,27 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import PongContainer from '../components/PongContainer.jsx';
+import StarWavesContainer from '../components/StarWavesContainer.jsx';
 import QuitGameButton, { GamePlayFabs } from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useGameExpand } from '../hooks/useGameExpand.js';
 import { submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
-import { WIN_SCORE } from '../game/PongScene.js';
 
-export default function GamePong() {
+export default function GameStarWaves() {
   const { user } = useAuth();
   const gameRef = useRef(null);
   const [gameKey, setGameKey] = useState(0);
   const [playState, setPlayState] = useState('waiting');
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
-  const [cpuScore, setCpuScore] = useState(0);
+  const [wave, setWave] = useState(1);
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
   const [savedAt, setSavedAt] = useState('');
 
-  const handleGameOver = useCallback((finalScore, finalCpuScore = 0) => {
+  const handleGameOver = useCallback((finalScore, finalWave = 1) => {
     setScore(finalScore);
-    setCpuScore(finalCpuScore);
+    setWave(finalWave);
     setIsGameOver(true);
     setPlayState('ended');
     setSubmitState('idle');
@@ -34,7 +33,7 @@ export default function GamePong() {
     setIsGameOver(false);
     setPlayState('waiting');
     setScore(0);
-    setCpuScore(0);
+    setWave(1);
     setSubmitState('idle');
     setSubmitError('');
     setSavedAt('');
@@ -58,7 +57,7 @@ export default function GamePong() {
     setSubmitError('');
 
     try {
-      const saved = await submitScore(score, 'pong');
+      const saved = await submitScore(score, 'starwaves');
       setSavedAt(saved.createdAt);
       setSubmitState('saved');
     } catch (error) {
@@ -67,22 +66,21 @@ export default function GamePong() {
     }
   }
 
-  const won = score >= WIN_SCORE;
   const kicker =
     playState === 'waiting'
-      ? 'Press Start, then move your paddle to hit the ball'
+      ? 'Press Start, then move your ship and blast the star blobs'
       : playState === 'paused'
-        ? 'Game paused — press Resume to keep playing'
+        ? 'Game paused — press Resume to keep defending'
         : playState === 'playing'
-          ? `Move with the mouse, a finger, or arrow keys · first to ${WIN_SCORE} wins · P or Esc to pause`
+          ? 'Move with the mouse, a finger, or arrows · tap or Space to shoot · P or Esc to pause'
           : '';
 
   return (
     <section className={`game-wrap${isExpanded ? ' is-expanded' : ''}`}>
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
       <div className={`game-page${isExpanded ? ' is-expanded' : ''}`}>
-        <div className="game-stage pong-stage">
-          <PongContainer
+        <div className="game-stage starwaves-stage">
+          <StarWavesContainer
             key={gameKey}
             ref={gameRef}
             onGameOver={handleGameOver}
@@ -98,13 +96,14 @@ export default function GamePong() {
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
                 <p>
-                  You vs the computer. Move your paddle with a finger or the mouse. First to {WIN_SCORE} points wins!
+                  Slide your ship along the bottom. Tap or press Space to send a star shot. Clear each wave before the
+                  blobs reach you!
                 </p>
                 <div className="actions">
                   <button className="button button-play" type="button">
                     Start
                   </button>
-                  <Link className="button button-secondary" to="/howto/pong" onClick={(event) => event.stopPropagation()}>
+                  <Link className="button button-secondary" to="/howto/starwaves" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
                   <QuitGameButton onClick={handleQuit} />
@@ -117,7 +116,7 @@ export default function GamePong() {
             <div className="overlay">
               <div className="panel overlay-panel">
                 <h2>Paused</h2>
-                <p>The ball will wait right here.</p>
+                <p>The star blobs will wait right here.</p>
                 <div className="actions">
                   <button className="button button-play" type="button" onClick={() => gameRef.current?.resume()}>
                     Resume
@@ -131,11 +130,9 @@ export default function GamePong() {
           {isGameOver && (
             <div className="overlay">
               <div className="panel overlay-panel">
-                <h2>{won ? 'You win!' : 'Nice try!'}</h2>
-                <p className="final-score">
-                  You {score} : {cpuScore} CPU
-                </p>
-                <p>{won ? 'You beat the computer!' : 'The computer got there first. Another round?'}</p>
+                <h2>Nice blasting!</h2>
+                <p className="final-score">You scored {score}!</p>
+                <p>You reached wave {wave}. Want to chase an even bigger star score?</p>
 
                 {user ? (
                   <form onSubmit={handleSubmit} className="score-form">
@@ -148,10 +145,10 @@ export default function GamePong() {
                   <div className="score-form">
                     <p>Sign in to put this score on the board.</p>
                     <div className="actions">
-                      <Link className="button" to="/signin" state={{ from: '/game/pong' }}>
+                      <Link className="button" to="/signin" state={{ from: '/game/starwaves' }}>
                         Sign in
                       </Link>
-                      <Link className="button button-pink" to="/signup" state={{ from: '/game/pong' }}>
+                      <Link className="button button-pink" to="/signup" state={{ from: '/game/starwaves' }}>
                         Sign up
                       </Link>
                     </div>
@@ -160,14 +157,14 @@ export default function GamePong() {
 
                 {submitError && <p className="error">{submitError}</p>}
                 {submitState === 'saved' && (
-                  <p className="success">Saved on {formatScoreDate(savedAt)}. Great rally!</p>
+                  <p className="success">Saved on {formatScoreDate(savedAt)}. Super shooting!</p>
                 )}
                 <div className="actions">
                   <button className="button button-play" type="button" onClick={playAgain}>
                     Play again
                   </button>
                   {user ? (
-                    <Link className="button button-secondary" to="/leaderboard?game=pong">
+                    <Link className="button button-secondary" to="/leaderboard?game=starwaves">
                       High scores
                     </Link>
                   ) : null}
