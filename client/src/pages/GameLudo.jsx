@@ -450,65 +450,15 @@ export default function GameLudo() {
       {kicker ? <p className="game-kicker">{kicker}</p> : null}
 
       <div className={`puzzle-page ludo-page${isExpanded ? ' is-expanded' : ''}`}>
-        <div className="puzzle-hud">
-          <div className="puzzle-scores">
-            <div className="puzzle-score">
-              <span>You</span>
-              <strong>{playerScore}</strong>
-            </div>
-            <div className="puzzle-score">
-              <span>Home</span>
-              <strong>
-                {finishedCount(game, PLAYER)}/{TOKEN_COUNT}
-              </strong>
-            </div>
-            <div className="puzzle-score">
-              <span>Best</span>
-              <strong>{best}</strong>
-            </div>
-          </div>
-          <div className="puzzle-hud-actions">
-            {playing ? (
-              <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
-                Restart
-              </button>
-            ) : null}
-            <QuitGameButton className="button button-secondary puzzle-new" onClick={handleQuit} />
-          </div>
-        </div>
-
-        <div className="ludo-homes" aria-label="Tokens home">
-          {TURN_ORDER.map((id) => (
-            <div key={id} className={`ludo-home-chip is-${id}${game.turn === id && playing ? ' is-turn' : ''}`}>
-              <span>{id === PLAYER ? 'You' : PLAYERS[id].name}</span>
-              <strong>
-                {finishedCount(game, id)}/{TOKEN_COUNT}
-              </strong>
-            </div>
-          ))}
-        </div>
-
-        {playing ? (
-          <p className="ttt-turn" aria-live="polite">
-            {banner}
-          </p>
-        ) : null}
-
-        {playing ? (
-          <div className="ludo-die-wrap">
-            <LudoDie value={dieValue} rolling={rolling} disabled={phase !== 'roll' || rolling} onRoll={handleRoll} />
-            <p>{phase === 'roll' ? 'Tap to roll' : rolling ? 'Rolling…' : `Rolled ${dice || dieValue}`}</p>
-          </div>
-        ) : null}
-
-        <div className="puzzle-stage ludo-stage">
-          <LudoBoard
-            tokens={game.tokens}
-            legalMoves={moves}
-            lastMove={lastMove}
-            onPlay={handlePlay}
-            disabled={boardLocked}
-          />
+        <div className="ludo-layout">
+          <div className="puzzle-stage ludo-stage">
+            <LudoBoard
+              tokens={game.tokens}
+              legalMoves={moves}
+              lastMove={lastMove}
+              onPlay={handlePlay}
+              disabled={boardLocked}
+            />
 
           {playState === 'waiting' && (
             <div className="overlay" onClick={startGame}>
@@ -584,6 +534,71 @@ export default function GameLudo() {
               </div>
             </div>
           )}
+          </div>
+
+          <aside className="ludo-side">
+            <div className="puzzle-hud">
+              <div className="puzzle-scores">
+                <div className="puzzle-score">
+                  <span>You</span>
+                  <strong>{playerScore}</strong>
+                </div>
+                <div className="puzzle-score">
+                  <span>Home</span>
+                  <strong>
+                    {finishedCount(game, PLAYER)}/{TOKEN_COUNT}
+                  </strong>
+                </div>
+                <div className="puzzle-score">
+                  <span>Best</span>
+                  <strong>{best}</strong>
+                </div>
+              </div>
+              <div className="puzzle-hud-actions">
+                {playing ? (
+                  <button className="button button-pink puzzle-new" type="button" onClick={startGame}>
+                    Restart
+                  </button>
+                ) : null}
+                <QuitGameButton className="button button-secondary puzzle-new" onClick={handleQuit} />
+              </div>
+            </div>
+
+            <div className="ludo-homes" aria-label="Tokens home">
+              {TURN_ORDER.map((id) => (
+                <div key={id} className={`ludo-home-chip is-${id}${game.turn === id && playing ? ' is-turn' : ''}`}>
+                  <span>{id === PLAYER ? 'You' : PLAYERS[id].name}</span>
+                  <strong>
+                    {finishedCount(game, id)}/{TOKEN_COUNT}
+                  </strong>
+                </div>
+              ))}
+            </div>
+
+            {playing ? (
+              <p className="ttt-turn" aria-live="polite">
+                {banner}
+              </p>
+            ) : null}
+
+            <div className="ludo-die-wrap">
+              <LudoDie
+                value={dieValue}
+                rolling={rolling}
+                disabled={!playing || phase !== 'roll' || rolling}
+                onRoll={handleRoll}
+              />
+              <p>
+                {!playing
+                  ? 'Dice'
+                  : phase === 'roll'
+                    ? 'Tap to roll'
+                    : rolling
+                      ? 'Rolling…'
+                      : `Rolled ${dice || dieValue}`}
+              </p>
+            </div>
+          </aside>
         </div>
       </div>
     </section>

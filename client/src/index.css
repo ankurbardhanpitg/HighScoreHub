@@ -2689,12 +2689,17 @@ main {
 }
 
 @media (max-width: 780px) {
-  .chess-layout {
+  .chess-layout,
+  .ludo-layout {
     grid-template-columns: 1fr;
   }
 
   .chess-page .chess-captures {
     flex-direction: row;
+  }
+
+  .ludo-homes {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -2821,7 +2826,7 @@ main {
 }
 
 .ludo-page {
-  width: min(620px, 100%);
+  width: min(980px, 100%);
 }
 
 .ludo-page.is-expanded {
@@ -2829,11 +2834,59 @@ main {
   margin-bottom: 24px;
 }
 
+.ludo-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 16px;
+  align-items: start;
+}
+
+.ludo-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ludo-page .puzzle-hud {
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 0;
+}
+
+.ludo-page .puzzle-scores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ludo-page .puzzle-score {
+  min-width: 0;
+  flex: 1;
+}
+
+.ludo-page .puzzle-score strong {
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
+.ludo-page .puzzle-hud-actions {
+  justify-content: stretch;
+}
+
+.ludo-page .puzzle-hud-actions .button {
+  flex: 1;
+}
+
+.ludo-page .ttt-turn {
+  margin: 0;
+}
+
 .ludo-homes {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin: 0 0 12px;
+  margin: 0;
 }
 
 .ludo-home-chip {
@@ -2882,6 +2935,7 @@ main {
 }
 
 .ludo-stage {
+  min-width: 0;
   background: linear-gradient(180deg, #fff, #ffe8d4);
   box-shadow: var(--shadow), 0 10px 0 #d48a2a;
 }
@@ -3038,8 +3092,13 @@ main {
 .ludo-die-wrap {
   display: grid;
   justify-items: center;
-  gap: 6px;
-  margin: 0 0 12px;
+  gap: 8px;
+  margin: 0;
+  padding: 16px 12px;
+  border-radius: 24px;
+  background: rgba(255, 253, 248, 0.94);
+  border: 4px solid #fff;
+  box-shadow: var(--shadow);
 }
 
 .ludo-die-wrap p {
@@ -3049,15 +3108,15 @@ main {
 }
 
 .ludo-die {
-  width: 72px;
-  height: 72px;
+  width: 88px;
+  height: 88px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: 6px;
-  padding: 10px;
+  padding: 12px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 18px;
   background: #fffdf8;
   box-shadow: 0 6px 0 #d48a2a, var(--shadow);
   cursor: pointer;
