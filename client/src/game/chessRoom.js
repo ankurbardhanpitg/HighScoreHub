@@ -16,7 +16,9 @@ export function getChessPlayerId() {
 }
 
 export function chessWsUrl() {
-  const base = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const base =
+    import.meta.env.VITE_API_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
   const url = new URL('/ws/chess', base);
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
   return url.toString();
