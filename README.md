@@ -17,7 +17,7 @@ Games on the hub:
 - Tic Tac Toe (you vs the computer, three in a row, first to 5)
 - Connect Four (you vs the computer, four in a row, first to 5)
 - Chess (vs the computer, or make a room and share the link so a friend can join)
-- Ludo (roll the dice, race four tokens home before the computer)
+- Ludo (vs the computer, or make a room and share the link so 2 to 4 friends can play)
 - Tower Defense (place towers on the grass, stop the blobs, beat 30 waves)
 - Simon Says (watch the lights, repeat the sequence, one miss ends the game)
 
@@ -79,6 +79,12 @@ Chess rooms (live two-player):
 - `POST /api/chess/rooms` — body `{ "playerId": "…", "name": "Ada" }`. Makes a room and returns `{ "roomId": "K7MP2Q" }`.
 - `GET /api/chess/rooms/:roomId` — checks that a room exists.
 - WebSocket `ws://localhost:3001/ws/chess` — join with `{ "type": "join", "roomId", "playerId", "name" }`, then send `{ "type": "move", "from", "to", "promo" }`. Share `/game/chess/room/:roomId` so a friend can open the same room.
+
+Ludo rooms (live 2–4 players):
+
+- `POST /api/ludo/rooms` — body `{ "playerId": "…", "name": "Ada" }`. Makes a room and returns `{ "roomId": "K7MP2Q" }`.
+- `GET /api/ludo/rooms/:roomId` — checks that a room exists.
+- WebSocket `ws://localhost:3001/ws/ludo` — join with `{ "type": "join", "roomId", "playerId", "name" }`, then send `{ "type": "start" }`, `{ "type": "roll" }`, or `{ "type": "move", "tokenIndex" }`. Share `/game/ludo/room/:roomId` so friends can open the same room.
 
 ## Run the client
 

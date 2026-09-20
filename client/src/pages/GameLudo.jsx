@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LudoBoard, { LudoDie } from '../components/LudoBoard.jsx';
 import QuitGameButton from '../components/QuitGameButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useGameExpand } from '../hooks/useGameExpand.js';
-import { submitScore } from '../api.js';
+import { createLudoRoom, submitScore } from '../api.js';
 import { formatScoreDate } from '../formatDate.js';
+import { getLudoPlayerId, parseLudoRoomInput } from '../game/ludoRoom.js';
 import {
   PLAYER,
   PLAYERS,
@@ -66,6 +67,7 @@ function playTone(audioRef, { type, startFreq, endFreq, duration, volume = 0.08 
 
 export default function GameLudo() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [playState, setPlayState] = useState('waiting');
   const [game, setGame] = useState(initialState);
   const [phase, setPhase] = useState('roll');
@@ -79,6 +81,9 @@ export default function GameLudo() {
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
   const [savedAt, setSavedAt] = useState('');
+  const [joinCode, setJoinCode] = useState('');
+  const [roomBusy, setRoomBusy] = useState(false);
+  const [roomError, setRoomError] = useState('');
 
   const playStateRef = useRef(playState);
   const gameRef = useRef(game);
@@ -130,6 +135,32 @@ export default function GameLudo() {
     },
     [clearTimers, rememberBest],
   );
+
+  async function playFriend(event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    setRoomBusy(true);
+    setRoomError('');
+    try {
+      const { roomId } = await createLudoRoom(getLudoPlayerId(), user?.username || 'Guest');
+      navigate(`/game/ludo/room/${roomId}`);
+    } catch (err) {
+      setRoomError(err.message || 'Could not make a room');
+    } finally {
+      setRoomBusy(false);
+    }
+  }
+
+  function joinFriendRoom(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const code = parseLudoRoomInput(joinCode);
+    if (code.length < 4) {
+      setRoomError('Type a room code or paste a room link');
+      return;
+    }
+    navigate(`/game/ludo/room/${code}`);
+  }
 
   const presentRoll = useCallback(
     async (runId, value) => {
@@ -440,7 +471,7 @@ export default function GameLudo() {
   const dieValue = rolling ? diceSpin : dice || diceSpin;
   const kicker =
     playState === 'waiting'
-      ? 'Press Start, roll a 6 to leave the yard, and get all 4 tokens home'
+      ? 'Press Start vs the computer, or make a room and share the link with friends'
       : playState === 'playing'
         ? `You are pink · roll a 6 to come out · Space rolls, 1–4 moves a token`
         : '';
@@ -458,25 +489,44 @@ export default function GameLudo() {
               lastMove={lastMove}
               onPlay={handlePlay}
               disabled={boardLocked}
+              playerColor={PLAYER}
             />
 
           {playState === 'waiting' && (
-            <div className="overlay" onClick={startGame}>
+            <div className="overlay">
               <div className="panel overlay-panel">
                 <h2>Ready?</h2>
                 <p>
-                  You are pink. Roll a 6 to leave the yard, race around the board, and get all four tokens home before
-                  Green, Yellow, and Blue.
+                  You are pink. Play the computer, or make a room and share the link so 2 to 4 friends can race.
                 </p>
                 <div className="actions">
-                  <button className="button button-play" type="button">
-                    Start
+                  <button className="button button-play" type="button" onClick={startGame}>
+                    Vs computer
+                  </button>
+                  <button className="button button-pink" type="button" onClick={playFriend} disabled={roomBusy}>
+                    {roomBusy ? 'Making room…' : 'Play friends'}
                   </button>
                   <Link className="button button-secondary" to="/howto/ludo" onClick={(event) => event.stopPropagation()}>
                     How to play
                   </Link>
                   <QuitGameButton onClick={handleQuit} />
                 </div>
+                <form className="chess-join" onSubmit={joinFriendRoom}>
+                  <label htmlFor="ludo-join-code">Have a room code or link?</label>
+                  <div className="chess-share-row">
+                    <input
+                      id="ludo-join-code"
+                      value={joinCode}
+                      onChange={(event) => setJoinCode(event.target.value)}
+                      placeholder="Paste link or code"
+                      autoComplete="off"
+                    />
+                    <button className="button" type="submit">
+                      Join
+                    </button>
+                  </div>
+                </form>
+                {roomError ? <p className="error">{roomError}</p> : null}
               </div>
             </div>
           )}

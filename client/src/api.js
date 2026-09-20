@@ -78,6 +78,13 @@ export function createChessRoom(playerId, name) {
   });
 }
 
+export function createLudoRoom(playerId, name) {
+  return request('/api/ludo/rooms', {
+    method: 'POST',
+    body: JSON.stringify({ playerId, name }),
+  });
+}
+
 export function fetchTopScores(page = 1, limit = 10, game = 'flappy') {
   const params = new URLSearchParams({
     page: String(page),

@@ -4,8 +4,10 @@ import express from 'express';
 import cors from 'cors';
 import { connectDb } from './db.js';
 import { attachChessSockets } from './chessRooms.js';
+import { attachLudoSockets } from './ludoRooms.js';
 import authRouter from './routes/auth.js';
 import chessRouter from './routes/chess.js';
+import ludoRouter from './routes/ludo.js';
 import scoresRouter from './routes/scores.js';
 
 const app = express();
@@ -28,12 +30,32 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/chess', chessRouter);
+app.use('/api/ludo', ludoRouter);
 app.use('/api/scores', scoresRouter);
 
 async function start() {
   await connectDb();
   const server = http.createServer(app);
-  attachChessSockets(server, CLIENT_ORIGIN);
+  const chessWss = attachChessSockets(CLIENT_ORIGIN);
+  const ludoWss = attachLudoSockets(CLIENT_ORIGIN);
+
+  server.on('upgrade', (req, socket, head) => {
+    const pathname = String(req.url || '').split('?')[0];
+    if (pathname === '/ws/chess') {
+      chessWss.handleUpgrade(req, socket, head, (ws) => {
+        chessWss.emit('connection', ws, req);
+      });
+      return;
+    }
+    if (pathname === '/ws/ludo') {
+      ludoWss.handleUpgrade(req, socket, head, (ws) => {
+        ludoWss.emit('connection', ws, req);
+      });
+      return;
+    }
+    socket.destroy();
+  });
+
   server.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);
   });

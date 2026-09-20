@@ -2934,6 +2934,22 @@ main {
   box-shadow: 0 0 0 3px #ffe566, var(--shadow);
 }
 
+.ludo-home-chip.is-empty {
+  opacity: 0.55;
+}
+
+.ludo-home-chip.is-away strong {
+  color: var(--danger);
+}
+
+.ludo-page .chess-panel {
+  margin: 0;
+}
+
+.ludo-page .chess-join {
+  margin-top: 14px;
+}
+
 .ludo-stage {
   min-width: 0;
   background: linear-gradient(180deg, #fff, #ffe8d4);

@@ -1,19 +1,22 @@
 import { randomInt } from 'crypto';
 import { WebSocketServer } from 'ws';
 import {
+  TURN_ORDER,
   applyMove,
-  BLACK,
-  findMove,
-  getStatus,
+  dropPlayer,
   initialState,
-  WHITE,
-} from '../../client/src/game/chess.js';
+  legalMoves,
+  passTurn,
+  registerRoll,
+  rollDice,
+} from '../../client/src/game/ludo.js';
 
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const ROOM_TTL_MS = 45 * 60 * 1000;
 const WAITING_TTL_MS = 20 * 60 * 1000;
 const EMPTY_TTL_MS = 2 * 60 * 1000;
+const MAX_PLAYERS = 4;
 
 function isOpen(ws) {
   return Boolean(ws) && ws.readyState === 1;
@@ -49,40 +52,50 @@ function makeRoomId() {
   return code;
 }
 
+function emptySeats() {
+  return { red: null, green: null, yellow: null, blue: null };
+}
+
 function colorOfPlayer(room, playerId) {
-  if (room.host?.id === playerId) {
-    return WHITE;
-  }
-  if (room.guest?.id === playerId) {
-    return BLACK;
-  }
-  return null;
+  return TURN_ORDER.find((color) => room.seats[color]?.id === playerId) || null;
 }
 
 function seatFor(room, playerId) {
-  if (room.host?.id === playerId) {
-    return room.host;
-  }
-  if (room.guest?.id === playerId) {
-    return room.guest;
-  }
-  return null;
+  const color = colorOfPlayer(room, playerId);
+  return color ? room.seats[color] : null;
+}
+
+function firstOpenColor(room) {
+  return TURN_ORDER.find((color) => !room.seats[color]) || null;
+}
+
+function occupiedColors(room) {
+  return TURN_ORDER.filter((color) => room.seats[color]);
 }
 
 function publicRoom(room) {
+  const seats = {};
+  for (const color of TURN_ORDER) {
+    const seat = room.seats[color];
+    seats[color] = seat
+      ? {
+          name: seat.name,
+          connected: isOpen(seat.ws),
+        }
+      : null;
+  }
+
   return {
     id: room.id,
     status: room.status,
-    names: {
-      w: room.host?.name || 'White',
-      b: room.guest?.name || '',
-    },
-    connected: {
-      w: isOpen(room.host?.ws),
-      b: isOpen(room.guest?.ws),
-    },
+    seats,
+    hostColor: colorOfPlayer(room, room.hostId),
+    playerCount: occupiedColors(room).length,
     game: room.game,
+    dice: room.dice,
+    phase: room.phase,
     lastMove: room.lastMove,
+    lastEvent: room.lastEvent,
     result: room.result,
     reason: room.reason,
   };
@@ -95,24 +108,26 @@ function send(ws, payload) {
   ws.send(JSON.stringify(payload));
 }
 
-function sendState(room, seat) {
+function sendState(room, color) {
+  const seat = room.seats[color];
   if (!seat) {
     return;
   }
   send(seat.ws, {
     type: 'state',
-    color: seat === room.host ? WHITE : BLACK,
+    color,
     room: publicRoom(room),
   });
 }
 
 function broadcast(room) {
-  sendState(room, room.host);
-  sendState(room, room.guest);
+  for (const color of TURN_ORDER) {
+    sendState(room, color);
+  }
 }
 
-function bothDisconnected(room) {
-  return !isOpen(room.host?.ws) && !isOpen(room.guest?.ws);
+function allDisconnected(room) {
+  return occupiedColors(room).every((color) => !isOpen(room.seats[color]?.ws));
 }
 
 function destroyRoom(roomId) {
@@ -121,6 +136,25 @@ function destroyRoom(roomId) {
 
 function touch(room) {
   room.lastActive = Date.now();
+}
+
+function beginMatch(room) {
+  const active = occupiedColors(room);
+  if (active.length < 2) {
+    return 'Need at least two players to start';
+  }
+
+  room.game = initialState(active);
+  room.status = 'playing';
+  room.phase = 'roll';
+  room.dice = null;
+  room.lastMove = null;
+  room.result = null;
+  room.reason = null;
+  room.lastEvent = `${room.seats[room.game.turn]?.name || 'Pink'} rolls first`;
+  touch(room);
+  broadcast(room);
+  return null;
 }
 
 export function peekRoom(roomId) {
@@ -134,8 +168,11 @@ export function createRoom(playerId, name) {
   }
 
   for (const room of rooms.values()) {
-    if (room.host?.id === id && !room.guest && room.status === 'waiting') {
-      room.host.name = sanitizeName(name);
+    if (room.hostId === id && room.status === 'waiting' && occupiedColors(room).length === 1) {
+      const hostSeat = room.seats.red;
+      if (hostSeat) {
+        hostSeat.name = sanitizeName(name);
+      }
       touch(room);
       return room;
     }
@@ -149,15 +186,19 @@ export function createRoom(playerId, name) {
   const room = {
     id: roomId,
     status: 'waiting',
-    host: { id, name: sanitizeName(name), ws: null },
-    guest: null,
-    game: initialState(),
+    hostId: id,
+    seats: emptySeats(),
+    game: initialState(TURN_ORDER),
+    dice: null,
+    phase: 'roll',
     lastMove: null,
+    lastEvent: '',
     result: null,
     reason: null,
     createdAt: Date.now(),
     lastActive: Date.now(),
   };
+  room.seats.red = { id, name: sanitizeName(name), ws: null };
   rooms.set(roomId, room);
   return room;
 }
@@ -182,8 +223,9 @@ function joinRoom(ws, payload) {
     return;
   }
 
-  const existing = seatFor(room, playerId);
-  if (existing) {
+  const existingColor = colorOfPlayer(room, playerId);
+  if (existingColor) {
+    const existing = room.seats[existingColor];
     if (isOpen(existing.ws) && existing.ws !== ws) {
       send(existing.ws, {
         type: 'error',
@@ -194,26 +236,92 @@ function joinRoom(ws, payload) {
     }
     existing.ws = ws;
     existing.name = name || existing.name;
-    ws.chess = { roomId, playerId };
+    ws.ludo = { roomId, playerId };
     touch(room);
     broadcast(room);
     return;
   }
 
-  if (!room.guest) {
-    room.guest = { id: playerId, name, ws };
-    room.status = room.result ? 'ended' : 'playing';
-    ws.chess = { roomId, playerId };
-    touch(room);
-    broadcast(room);
+  if (room.status !== 'waiting') {
+    send(ws, {
+      type: 'error',
+      message: 'This game already started. Ask your friend for a new link.',
+      fatal: true,
+    });
     return;
   }
 
-  send(ws, {
-    type: 'error',
-    message: 'This room already has two players. Ask your friend for a new link.',
-    fatal: true,
-  });
+  const color = firstOpenColor(room);
+  if (!color) {
+    send(ws, {
+      type: 'error',
+      message: 'This room is full. Ask your friend for a new link.',
+      fatal: true,
+    });
+    return;
+  }
+
+  room.seats[color] = { id: playerId, name, ws };
+  ws.ludo = { roomId, playerId };
+  touch(room);
+
+  if (occupiedColors(room).length >= MAX_PLAYERS) {
+    beginMatch(room);
+    return;
+  }
+
+  broadcast(room);
+}
+
+function handleRoll(room, playerId) {
+  if (room.status !== 'playing' || room.result) {
+    return 'The game is not in play';
+  }
+
+  const color = colorOfPlayer(room, playerId);
+  if (!color) {
+    return 'You are not in this room';
+  }
+  if (room.game.turn !== color) {
+    return 'Wait for your turn';
+  }
+  if (room.phase !== 'roll') {
+    return 'Pick a token to move';
+  }
+
+  const value = rollDice();
+  const rolled = registerRoll(room.game, value);
+  room.game = rolled.state;
+  room.dice = value;
+
+  if (rolled.forfeited) {
+    room.phase = 'roll';
+    room.lastEvent = 'Three 6s in a row — turn skipped';
+    touch(room);
+    broadcast(room);
+    return null;
+  }
+
+  const moves = legalMoves(room.game, color, value);
+  if (moves.length === 0) {
+    if (value === 6) {
+      room.phase = 'roll';
+      room.lastEvent = 'No move for that 6 — roll again';
+    } else {
+      room.game = passTurn(room.game);
+      room.phase = 'roll';
+      room.lastEvent = 'No moves — next player';
+    }
+    touch(room);
+    broadcast(room);
+    return null;
+  }
+
+  room.phase = 'move';
+  room.lastEvent = `Rolled a ${value}`;
+  touch(room);
+  broadcast(room);
+  return null;
 }
 
 function handleMove(room, playerId, payload) {
@@ -228,32 +336,55 @@ function handleMove(room, playerId, payload) {
   if (room.game.turn !== color) {
     return 'Wait for your turn';
   }
+  if (room.phase !== 'move' || room.dice == null) {
+    return 'Roll the dice first';
+  }
 
-  const from = Number(payload.from);
-  const to = Number(payload.to);
-  const promo = payload.promo || undefined;
-  if (!Number.isInteger(from) || !Number.isInteger(to)) {
+  const tokenIndex = Number(payload.tokenIndex);
+  if (!Number.isInteger(tokenIndex)) {
     return 'That move is not allowed';
   }
 
-  const move = findMove(room.game, from, to, promo);
-  if (!move) {
+  const result = applyMove(room.game, color, tokenIndex, room.dice);
+  if (!result) {
     return 'That move is not allowed';
   }
 
-  room.game = applyMove(room.game, move);
-  room.lastMove = { from: move.from, to: move.to };
+  room.game = result.state;
+  room.lastMove = { playerId: color, tokenIndex };
 
-  const status = getStatus(room.game);
-  if (status.result) {
-    room.result = status.result;
-    room.reason = status.reason;
+  if (result.captured) {
+    room.lastEvent = `${room.seats[color]?.name || 'A player'} sent a token home`;
+  } else if (result.finished) {
+    room.lastEvent = `${room.seats[color]?.name || 'A player'} got a token home`;
+  }
+
+  if (result.state.winner) {
+    room.result = result.state.winner;
+    room.reason = 'home';
     room.status = 'ended';
+    room.phase = 'roll';
+    room.lastEvent = `${room.seats[result.state.winner]?.name || 'A player'} wins!`;
+  } else {
+    room.phase = 'roll';
+    if (!result.extraTurn) {
+      room.dice = null;
+    }
   }
 
   touch(room);
   broadcast(room);
   return null;
+}
+
+function handleStart(room, playerId) {
+  if (room.hostId !== playerId) {
+    return 'Only the host can start the game';
+  }
+  if (room.status !== 'waiting') {
+    return 'The game already started';
+  }
+  return beginMatch(room);
 }
 
 function handleResign(room, playerId) {
@@ -266,9 +397,20 @@ function handleResign(room, playerId) {
     return 'You are not in this room';
   }
 
-  room.result = color === WHITE ? BLACK : WHITE;
-  room.reason = 'resign';
-  room.status = 'ended';
+  room.game = dropPlayer(room.game, color);
+  if (room.game.turn !== color) {
+    room.phase = 'roll';
+    room.dice = null;
+  }
+  room.lastEvent = `${room.seats[color]?.name || 'A player'} left the race`;
+
+  if (room.game.winner) {
+    room.result = room.game.winner;
+    room.reason = 'resign';
+    room.status = 'ended';
+    room.lastEvent = `${room.seats[room.game.winner]?.name || 'A player'} wins!`;
+  }
+
   touch(room);
   broadcast(room);
   return null;
@@ -278,18 +420,10 @@ function handleRematch(room, playerId) {
   if (!seatFor(room, playerId)) {
     return 'You are not in this room';
   }
-  if (!room.guest) {
-    return 'Wait for your friend to join first';
+  if (occupiedColors(room).length < 2) {
+    return 'Wait for a friend to join first';
   }
-
-  room.game = initialState();
-  room.lastMove = null;
-  room.result = null;
-  room.reason = null;
-  room.status = 'playing';
-  touch(room);
-  broadcast(room);
-  return null;
+  return beginMatch(room);
 }
 
 function handleMessage(ws, data) {
@@ -307,7 +441,7 @@ function handleMessage(ws, data) {
     return;
   }
 
-  const meta = ws.chess;
+  const meta = ws.ludo;
   if (!meta) {
     send(ws, { type: 'error', message: 'Join a room first' });
     return;
@@ -320,8 +454,12 @@ function handleMessage(ws, data) {
   }
 
   let error = null;
-  if (type === 'move') {
+  if (type === 'roll') {
+    error = handleRoll(room, meta.playerId);
+  } else if (type === 'move') {
     error = handleMove(room, meta.playerId, payload);
+  } else if (type === 'start') {
+    error = handleStart(room, meta.playerId);
   } else if (type === 'resign') {
     error = handleResign(room, meta.playerId);
   } else if (type === 'rematch') {
@@ -336,7 +474,7 @@ function handleMessage(ws, data) {
 }
 
 function handleClose(ws) {
-  const meta = ws.chess;
+  const meta = ws.ludo;
   if (!meta) {
     return;
   }
@@ -359,7 +497,7 @@ function sweepRooms() {
   const now = Date.now();
   for (const [id, room] of rooms) {
     const idle = now - room.lastActive;
-    if (bothDisconnected(room) && idle > EMPTY_TTL_MS) {
+    if (allDisconnected(room) && idle > EMPTY_TTL_MS) {
       destroyRoom(id);
       continue;
     }
@@ -373,7 +511,7 @@ function sweepRooms() {
   }
 }
 
-export function attachChessSockets(clientOrigin) {
+export function attachLudoSockets(clientOrigin) {
   const wss = new WebSocketServer({ noServer: true });
 
   wss.on('connection', (ws, req) => {

@@ -203,11 +203,12 @@ export const GAMES = [
     howToPath: '/howto/ludo',
     emoji: '🎲',
     cardClass: 'card-ludo',
-    blurb: 'Roll the dice, race your four tokens around the board, and get them all home before the computer.',
+    blurb: 'Play the computer, or make a room and share the link so 2 to 4 friends can race tokens home.',
     steps: [
       { emoji: '🎲', title: 'Roll a 6 to start', text: 'Tap the dice. A 6 lets a token leave your yard, and you get another roll. Space also rolls.', cardClass: 'card-tap' },
       { emoji: '🏃', title: 'Race around', text: 'Tap a glowing token to move it. Land on someone (not on a star) to send them back to their yard. Exact rolls get you home.', cardClass: 'card-ludo' },
-      { emoji: '🏠', title: 'Get all four home', text: 'Each token home scores 25, each capture 10, and finishing first adds 100. Beat Green, Yellow, and Blue!', cardClass: 'card-score' },
+      { emoji: '🏠', title: 'Get all four home', text: 'Each token home scores 25, each capture 10, and finishing first adds 100. Beat Green, Yellow, and Blue — or your friends!', cardClass: 'card-score' },
+      { emoji: '🔗', title: 'Play friends', text: 'Tap Play friends to make a room, then copy the link or code. 2 to 4 people can join. The host starts the game, or it starts when the fourth player arrives.', cardClass: 'card-ludo' },
     ],
   },
   {

@@ -214,18 +214,42 @@ function buildBoard() {
 
 export const BOARD = buildBoard();
 
-export function nextPlayer(playerId) {
-  const index = TURN_ORDER.indexOf(playerId);
-  return TURN_ORDER[(index + 1) % TURN_ORDER.length];
+export const COLOR_NAMES = {
+  red: 'Pink',
+  green: 'Green',
+  yellow: 'Yellow',
+  blue: 'Blue',
+};
+
+export function colorName(playerId) {
+  return COLOR_NAMES[playerId] || playerId;
+}
+
+export function activeColors(state) {
+  const list = Array.isArray(state?.active) ? state.active : TURN_ORDER;
+  const filtered = list.filter((id) => TURN_ORDER.includes(id));
+  return filtered.length ? filtered : TURN_ORDER;
+}
+
+export function nextPlayer(playerId, active = TURN_ORDER) {
+  const order = (Array.isArray(active) ? active : TURN_ORDER).filter((id) => TURN_ORDER.includes(id));
+  const list = order.length ? order : TURN_ORDER;
+  const index = list.indexOf(playerId);
+  if (index < 0) {
+    return list[0];
+  }
+  return list[(index + 1) % list.length];
 }
 
 export function rollDice() {
   return 1 + Math.floor(Math.random() * 6);
 }
 
-export function initialState() {
+export function initialState(activePlayers = TURN_ORDER) {
+  const active = TURN_ORDER.filter((id) => activePlayers.includes(id));
+  const colors = active.length ? active : TURN_ORDER;
   const tokens = [];
-  for (const playerId of TURN_ORDER) {
+  for (const playerId of colors) {
     for (let index = 0; index < TOKEN_COUNT; index += 1) {
       tokens.push({ playerId, index, steps: YARD });
     }
@@ -233,10 +257,11 @@ export function initialState() {
 
   return {
     tokens,
-    turn: PLAYER,
+    turn: colors[0],
     consecutiveSixes: 0,
     winner: null,
     captures: { red: 0, green: 0, yellow: 0, blue: 0 },
+    active: colors,
   };
 }
 
@@ -335,7 +360,7 @@ export function registerRoll(state, dice) {
       state: {
         ...state,
         consecutiveSixes: 0,
-        turn: nextPlayer(state.turn),
+        turn: nextPlayer(state.turn, activeColors(state)),
       },
       forfeited: true,
     };
@@ -354,7 +379,23 @@ export function passTurn(state) {
   return {
     ...state,
     consecutiveSixes: 0,
-    turn: nextPlayer(state.turn),
+    turn: nextPlayer(state.turn, activeColors(state)),
+  };
+}
+
+export function dropPlayer(state, playerId) {
+  const active = activeColors(state).filter((id) => id !== playerId);
+  if (active.length === 0) {
+    return { ...state, active: [], turn: null };
+  }
+
+  const turn = state.turn === playerId ? nextPlayer(playerId, active) : state.turn;
+  const winner = active.length === 1 ? active[0] : state.winner;
+  return {
+    ...state,
+    active,
+    turn,
+    winner,
   };
 }
 
@@ -396,8 +437,9 @@ export function applyMove(state, playerId, tokenIndex, dice) {
 
   return {
     state: {
+      ...state,
       tokens,
-      turn: extraTurn ? state.turn : nextPlayer(playerId),
+      turn: extraTurn ? state.turn : nextPlayer(playerId, activeColors(state)),
       consecutiveSixes: extraTurn ? consecutiveSixes : 0,
       winner,
       captures,

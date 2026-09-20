@@ -34,8 +34,9 @@ export function LudoDie({ value, rolling, disabled, onRoll }) {
   );
 }
 
-function tokenLabel(token, movable) {
-  const name = token.playerId === 'red' ? 'your' : PLAYERS[token.playerId].name;
+function tokenLabel(token, movable, playerColor) {
+  const yours = token.playerId === playerColor;
+  const name = yours ? 'your' : PLAYERS[token.playerId].cpuName;
   const place = token.steps < 0 ? 'in the yard' : token.steps >= 56 ? 'home' : `token ${token.index + 1}`;
   if (movable) {
     return `Move ${name} token ${token.index + 1}`;
@@ -49,6 +50,7 @@ export default function LudoBoard({
   lastMove,
   onPlay,
   disabled,
+  playerColor = 'red',
 }) {
   const movable = new Set((legalMoves || []).map((move) => move.tokenIndex));
   const lastKey = lastMove ? `${lastMove.playerId}:${lastMove.tokenIndex}` : '';
@@ -81,7 +83,7 @@ export default function LudoBoard({
               {meta.safe && meta.kind === 'path' && !meta.start ? <span className="ludo-star" aria-hidden="true">✦</span> : null}
               {here.map((token) => {
                 const key = `${token.playerId}:${token.index}`;
-                const canMove = !disabled && token.playerId === 'red' && movable.has(token.index);
+                const canMove = !disabled && token.playerId === playerColor && movable.has(token.index);
                 const classesForToken = ['ludo-token', `is-${token.playerId}`];
                 if (canMove) {
                   classesForToken.push('is-movable');
@@ -99,7 +101,7 @@ export default function LudoBoard({
                     type="button"
                     className={classesForToken.join(' ')}
                     disabled={!canMove}
-                    aria-label={tokenLabel(token, canMove)}
+                    aria-label={tokenLabel(token, canMove, playerColor)}
                     onClick={() => onPlay(token.index)}
                   >
                     {token.index + 1}
