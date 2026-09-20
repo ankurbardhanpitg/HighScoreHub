@@ -196,6 +196,21 @@ export const GAMES = [
     ],
   },
   {
+    id: 'ludo',
+    name: 'Ludo',
+    shortName: 'Ludo',
+    path: '/game/ludo',
+    howToPath: '/howto/ludo',
+    emoji: '🎲',
+    cardClass: 'card-ludo',
+    blurb: 'Roll the dice, race your four tokens around the board, and get them all home before the computer.',
+    steps: [
+      { emoji: '🎲', title: 'Roll a 6 to start', text: 'Tap the dice. A 6 lets a token leave your yard, and you get another roll. Space also rolls.', cardClass: 'card-tap' },
+      { emoji: '🏃', title: 'Race around', text: 'Tap a glowing token to move it. Land on someone (not on a star) to send them back to their yard. Exact rolls get you home.', cardClass: 'card-ludo' },
+      { emoji: '🏠', title: 'Get all four home', text: 'Each token home scores 25, each capture 10, and finishing first adds 100. Beat Green, Yellow, and Blue!', cardClass: 'card-score' },
+    ],
+  },
+  {
     id: 'towerdefense',
     name: 'Tower Defense',
     shortName: 'Towers',

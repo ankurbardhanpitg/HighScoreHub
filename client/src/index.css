@@ -952,6 +952,10 @@ main {
   background: #d8f5d3;
 }
 
+.card-ludo span {
+  background: #ffe1ea;
+}
+
 .panel {
   max-width: 560px;
   background: rgba(255, 253, 248, 0.94);
@@ -2816,6 +2820,297 @@ main {
   }
 }
 
+.ludo-page {
+  width: min(620px, 100%);
+}
+
+.ludo-page.is-expanded {
+  --game-play-scale: 1;
+  margin-bottom: 24px;
+}
+
+.ludo-homes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.ludo-home-chip {
+  display: grid;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.92);
+  border: 3px solid #fff;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.ludo-home-chip span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ludo-home-chip strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+
+.ludo-home-chip.is-red {
+  background: #ffe1ea;
+}
+
+.ludo-home-chip.is-green {
+  background: #d8f5d3;
+}
+
+.ludo-home-chip.is-yellow {
+  background: #fff3c4;
+}
+
+.ludo-home-chip.is-blue {
+  background: #dcecff;
+}
+
+.ludo-home-chip.is-turn {
+  box-shadow: 0 0 0 3px #ffe566, var(--shadow);
+}
+
+.ludo-stage {
+  background: linear-gradient(180deg, #fff, #ffe8d4);
+  box-shadow: var(--shadow), 0 10px 0 #d48a2a;
+}
+
+.ludo-board {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  grid-template-rows: repeat(15, minmax(0, 1fr));
+  gap: 2px;
+  aspect-ratio: 1;
+  padding: 8px;
+  border-radius: 24px;
+  background: #243047;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.ludo-cell {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 4px;
+  background: #fffdf8;
+}
+
+.ludo-cell.is-yard.is-red {
+  background: #ff8fb3;
+}
+
+.ludo-cell.is-yard.is-green {
+  background: #7ed957;
+}
+
+.ludo-cell.is-yard.is-yellow {
+  background: #ffe566;
+}
+
+.ludo-cell.is-yard.is-blue {
+  background: #7ec4ff;
+}
+
+.ludo-cell.is-slot {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.55);
+}
+
+.ludo-cell.is-path {
+  background: #fffdf8;
+}
+
+.ludo-cell.is-start.is-red,
+.ludo-cell.is-home.is-red,
+.ludo-cell.is-center.is-red {
+  background: #ff6b9d;
+}
+
+.ludo-cell.is-start.is-green,
+.ludo-cell.is-home.is-green,
+.ludo-cell.is-center.is-green {
+  background: #3d9a2a;
+}
+
+.ludo-cell.is-start.is-yellow,
+.ludo-cell.is-home.is-yellow,
+.ludo-cell.is-center.is-yellow {
+  background: #f5c518;
+}
+
+.ludo-cell.is-start.is-blue,
+.ludo-cell.is-home.is-blue,
+.ludo-cell.is-center.is-blue {
+  background: #4da3ff;
+}
+
+.ludo-cell.is-center.is-hub {
+  background: #fffdf8;
+  box-shadow: inset 0 0 0 2px #ffe566;
+}
+
+.ludo-star {
+  position: absolute;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: #c9a00e;
+  pointer-events: none;
+}
+
+.ludo-token {
+  z-index: 1;
+  width: 78%;
+  height: 78%;
+  min-width: 12px;
+  min-height: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fffdf8;
+  cursor: default;
+  box-shadow: 0 2px 0 rgba(26, 36, 54, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.ludo-token:disabled {
+  opacity: 1;
+}
+
+.ludo-token.is-red {
+  background: #e23d6b;
+}
+
+.ludo-token.is-green {
+  background: #1f8a4c;
+}
+
+.ludo-token.is-yellow {
+  background: #d4a017;
+  color: #243047;
+}
+
+.ludo-token.is-blue {
+  background: #2776d4;
+}
+
+.ludo-token.is-stack {
+  width: 46%;
+  height: 46%;
+  font-size: 0.5rem;
+}
+
+.ludo-token.is-last {
+  box-shadow: 0 0 0 2px #ffe566, 0 2px 0 rgba(26, 36, 54, 0.35);
+}
+
+.ludo-token.is-movable {
+  cursor: pointer;
+  animation: ludo-pulse 720ms ease-in-out infinite;
+}
+
+.ludo-token.is-movable:hover,
+.ludo-token.is-movable:focus-visible {
+  outline: 2px solid #ffe566;
+  outline-offset: 1px;
+  transform: scale(1.08);
+}
+
+.ludo-die-wrap {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.ludo-die-wrap p {
+  margin: 0;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.ludo-die {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+  padding: 10px;
+  border: 0;
+  border-radius: 16px;
+  background: #fffdf8;
+  box-shadow: 0 6px 0 #d48a2a, var(--shadow);
+  cursor: pointer;
+}
+
+.ludo-die:disabled {
+  cursor: default;
+  box-shadow: 0 4px 0 #cbb7a0, var(--shadow);
+}
+
+.ludo-die:hover:not(:disabled),
+.ludo-die:focus-visible {
+  outline: 3px solid #ffe566;
+  transform: translateY(-2px);
+}
+
+.ludo-die.is-rolling {
+  animation: ludo-roll 120ms linear infinite;
+}
+
+.ludo-pip {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.ludo-pip.is-on {
+  background: #243047;
+}
+
+@keyframes ludo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes ludo-roll {
+  0% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+  100% {
+    transform: rotate(-8deg);
+  }
+}
+
 @keyframes c4-drop {
   0% {
     transform: translateY(-140%) scale(0.92);
@@ -2886,6 +3181,11 @@ main {
   .chess-piece,
   .chess-square.is-check,
   .simon-pad.is-miss {
+    animation: none;
+  }
+
+  .ludo-token.is-movable,
+  .ludo-die.is-rolling {
     animation: none;
   }
 
